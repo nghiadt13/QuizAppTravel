@@ -20,6 +20,9 @@ lib/features/weather/
 │   ├── mappers/                 # Lớp ánh xạ chuyển đổi qua lại giữa DTO và Entity
 │   └── repositories/            # Hiện thực hóa (Implement) các Interface của domain
 │
+├── application/                 # LỚP ĐIỀU PHỐI (Application Services / Use Cases)
+│   └── services/                # Các dịch vụ điều phối logic nghiệp vụ ứng dụng
+│
 └── presentation/                # LỚP GIAO DIỆN (UI & ViewModels)
     ├── views/                   # Các màn hình chính (Screens/Pages) của tính năng
     ├── viewmodels/              # ViewModel quản lý State và Business Logic của giao diện
@@ -46,10 +49,15 @@ lib/features/weather/
   * **DataSource**: Lớp giao tiếp trực tiếp với Firebase (sử dụng `FirebaseFirestore.instance`).
   * **Repository Implementation**: Nhận vào `DataSource` thông qua Dependency Injection và thực hiện ghi đè hàm của Repository Interface ở tầng Domain.
 
-### C. Tầng Presentation (Phụ thuộc vào Domain & State Management)
+### C. Tầng Application (Lớp điều phối)
+* **Nhiệm vụ**: Điều phối và liên kết các luồng nghiệp vụ giữa lớp Domain và Presentation. Chứa các Application Services chịu trách nhiệm phối hợp nhiều Repository hoặc tích hợp các logic không thuộc về nghiệp vụ cốt lõi (như caching, định tuyến nghiệp vụ phức tạp).
+* **Thành phần**:
+  * **Service**: Chứa các service xử lý điều phối (ví dụ: `WeatherService` gọi repository và xử lý gom nhóm dữ liệu trước khi đẩy sang ViewModel).
+
+### D. Tầng Presentation (Phụ thuộc vào Domain & State Management)
 * **Nhiệm vụ**: Hiển thị dữ liệu lên màn hình và nhận tương tác từ người dùng.
 * **Thành phần**:
-  * **ViewModel**: Kế thừa `ChangeNotifier` (của Provider). Nhận dữ liệu từ Repository (Domain), cập nhật trạng thái (`notifyListeners()`) để giao diện vẽ lại.
+  * **ViewModel**: Kế thừa `ChangeNotifier` (của Provider). Nhận dữ liệu từ Repository (Domain) hoặc Application Service, cập nhật trạng thái (`notifyListeners()`) để giao diện vẽ lại.
   * **View (Screen)**: Widget giao diện lắng nghe trạng thái từ ViewModel để hiển thị và gọi hàm của ViewModel khi người dùng thao tác.
 
 ---
