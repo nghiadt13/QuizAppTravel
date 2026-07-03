@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "58793994198",
+    "project_id": "quizapptravel",
+    "storage_bucket": "quizapptravel.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:58793994198:android:ed695851253034c8332677",
+        "android_client_info": {
+          "package_name": "com.example.quiz_app_travel"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxV_bJP22oeObmg9E7zq3gxjaM3MsaXG0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
