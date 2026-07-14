@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -29,19 +30,42 @@ class AuthRemoteDataSourceImpl implements IAuthRemoteDataSource {
   @override
   Future<HostUserDto> signInWithGoogle() async {
     try {
-      final googleUser = await _googleSignIn.authenticate();
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-      final String? idToken = googleAuth.idToken;
-      if (idToken == null) {
-        throw const AppException('Failed to retrieve ID Token from Google Sign-In.');
+      User? firebaseUser;
+      String? displayName;
+      String? email;
+      String? avatarUrl;
+
+      if (kIsWeb) {
+        // Web flow: Use browser popup to authenticate with Firebase Auth directly
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        final UserCredential userCredential = await _firebaseAuth.signInWithPopup(googleProvider);
+        firebaseUser = userCredential.user;
+        if (firebaseUser != null) {
+          displayName = firebaseUser.displayName;
+          email = firebaseUser.email;
+          avatarUrl = firebaseUser.photoURL;
+        }
+      } else {
+        // Mobile flow: Use native Google Sign-In SDK
+        final googleUser = await _googleSignIn.authenticate();
+        final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+        final String? idToken = googleAuth.idToken;
+        if (idToken == null) {
+          throw const AppException('Failed to retrieve ID Token from Google Sign-In.');
+        }
+
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          idToken: idToken,
+        );
+
+        final UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
+        firebaseUser = userCredential.user;
+        if (firebaseUser != null) {
+          displayName = firebaseUser.displayName ?? googleUser.displayName;
+          email = firebaseUser.email ?? googleUser.email;
+          avatarUrl = firebaseUser.photoURL ?? googleUser.photoUrl;
+        }
       }
-
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        idToken: idToken,
-      );
-
-      final UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
-      final User? firebaseUser = userCredential.user;
 
       if (firebaseUser == null) {
         throw const AppException('Failed to retrieve user information from Google Sign-In.');
@@ -49,9 +73,9 @@ class AuthRemoteDataSourceImpl implements IAuthRemoteDataSource {
 
       return HostUserDto(
         uid: firebaseUser.uid,
-        displayName: firebaseUser.displayName ?? googleUser.displayName ?? 'Host',
-        email: firebaseUser.email ?? googleUser.email,
-        avatarUrl: firebaseUser.photoURL ?? googleUser.photoUrl,
+        displayName: displayName ?? 'Host',
+        email: email ?? '',
+        avatarUrl: avatarUrl,
         createdAt: DateTime.now(),
       );
     } on FirebaseAuthException catch (e) {
@@ -65,7 +89,9 @@ class AuthRemoteDataSourceImpl implements IAuthRemoteDataSource {
   @override
   Future<void> signOut() async {
     try {
-      await _googleSignIn.signOut();
+      if (!kIsWeb) {
+        await _googleSignIn.signOut();
+      }
       await _firebaseAuth.signOut();
     } on FirebaseAuthException catch (e) {
       throw AppException(e.message ?? 'Sign out failed.', code: e.code);
