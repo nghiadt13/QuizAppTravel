@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../router/app_router.dart';
@@ -75,11 +76,19 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
-  final googleSignIn = GoogleSignIn.instance;
-  await googleSignIn.initialize(
-    clientId: '58793994198-0fr6me63al9ohipl3idp41dtqa632p3q.apps.googleusercontent.com',
-  );
-  getIt.registerLazySingleton<GoogleSignIn>(() => googleSignIn);
+
+  // GoogleSignIn SDK: only initialize on non-web platforms.
+  // On web, auth uses Firebase signInWithPopup directly (see auth_remote_data_source.dart).
+  if (!kIsWeb) {
+    final googleSignIn = GoogleSignIn.instance;
+    await googleSignIn.initialize(
+      clientId: '58793994198-0fr6me63al9ohipl3idp41dtqa632p3q.apps.googleusercontent.com',
+    );
+    getIt.registerLazySingleton<GoogleSignIn>(() => googleSignIn);
+  } else {
+    // Register a no-op instance for web so GetIt doesn't fail
+    getIt.registerLazySingleton<GoogleSignIn>(() => GoogleSignIn.instance);
+  }
 
   // Router
   getIt.registerLazySingleton<AppRouter>(() => AppRouter());

@@ -96,7 +96,7 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 16),
-                  
+
                   // Stage Header
                   Text(
                     vm.isOpened ? 'Treasure Found! 🎉' : 'Claim Your Loot! 🎁',
@@ -117,48 +117,53 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
                     textAlign: TextAlign.center,
                   ),
 
-                  const Spacer(),
+                  const SizedBox(height: 16),
 
-                  // Game Area
-                  SizedBox(
-                    height: 240,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Particles
-                        SparkleParticles(play: vm.isOpened),
+                  // Scrollable middle area (chest + reward)
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Game Area
+                          SizedBox(
+                            height: 200,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                SparkleParticles(play: vm.isOpened),
+                                TreasureChest(
+                                  isShaking: vm.isShaking,
+                                  isOpened: vm.isOpened,
+                                  onTap: () => _onTapChest(userId),
+                                ),
+                              ],
+                            ),
+                          ),
 
-                        // Chest
-                        TreasureChest(
-                          isShaking: vm.isShaking,
-                          isOpened: vm.isOpened,
-                          onTap: () => _onTapChest(userId),
-                        ),
-                      ],
+                          // Tap counter prompt
+                          if (!vm.isOpened) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              'TAPS: ${vm.tapCount}/3',
+                              style: AppTextStyles.headlineSmall.copyWith(
+                                color: AppColors.coralOrange,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 2,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+
+                          // Reward Card reveal
+                          if (vm.isOpened && vm.reward != null) ...[
+                            const SizedBox(height: 16),
+                            RewardCard(reward: vm.reward!),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
-
-                  // Tap counter prompt
-                  if (!vm.isOpened) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      'TAPS: ${vm.tapCount}/3',
-                      style: AppTextStyles.headlineSmall.copyWith(
-                        color: AppColors.coralOrange,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 2,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-
-                  // Reward Card reveal
-                  if (vm.isOpened && vm.reward != null) ...[
-                    const SizedBox(height: 16),
-                    RewardCard(reward: vm.reward!),
-                  ],
-
-                  const Spacer(),
 
                   // Error notice
                   if (vm.errorMessage != null) ...[
@@ -170,13 +175,13 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
                     const SizedBox(height: 12),
                   ],
 
-                  // Actions button
+                  // Actions button (always at bottom)
                   if (vm.isOpened) ...[
                     if (!vm.isClaimed)
                       ElevatedButton(
                         onPressed: vm.isLoading ? null : () => _onClaim(userId),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.secondaryContainer, // Sunny Yellow
+                          backgroundColor: AppColors.secondaryContainer,
                           foregroundColor: AppColors.onSecondaryContainer,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           elevation: 2,
@@ -196,12 +201,11 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
                     else
                       ElevatedButton(
                         onPressed: () {
-                          // Clean up open chest state before navigating
                           vm.reset();
                           context.go('/home/leaderboard');
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary, // Deep Ocean Blue
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
