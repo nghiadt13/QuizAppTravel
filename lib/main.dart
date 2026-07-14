@@ -1,38 +1,157 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'core/di/di.dart';
+import 'core/theme/app_theme.dart';
+import 'core/router/app_router.dart';
+import 'features/auth/presentation/viewmodels/auth_view_model.dart';
+import 'features/quest_room/presentation/viewmodels/player_setup_view_model.dart';
+import 'features/quest_room/presentation/viewmodels/create_room_view_model.dart';
+import 'features/quest_room/presentation/viewmodels/join_room_view_model.dart';
+import 'features/quest_room/presentation/viewmodels/browse_quests_view_model.dart';
+import 'features/quest_room/presentation/viewmodels/lobby_view_model.dart';
+import 'features/quiz_game/presentation/viewmodels/quiz_play_view_model.dart';
+import 'features/live_monitoring/presentation/viewmodels/host_control_view_model.dart';
+import 'features/reward/presentation/viewmodels/open_chest_view_model.dart';
+import 'features/leaderboard/presentation/viewmodels/leaderboard_view_model.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase with generated options
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  
-  // Set up dependency injection (GetIt)
-  await setupDependencies();
+  String? initError;
 
-  runApp(const MyApp());
+  try {
+    // Initialize Firebase with generated options
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    initError = 'Firebase Initialization Error: $e';
+    debugPrint(initError);
+  }
+  
+  try {
+    // Set up dependency injection (GetIt)
+    await setupDependencies();
+  } catch (e) {
+    initError = '${initError ?? ''}\nDependency Injection Error: $e';
+    debugPrint('DI Setup Error: $e');
+  }
+
+  if (!kIsWeb) {
+    try {
+      await GoogleSignIn.instance.initialize();
+    } catch (e) {
+      debugPrint('Google Sign-In initialization failed: $e');
+    }
+  } else {
+    debugPrint('Google Sign-In initialization bypassed on Web (no Client ID configured).');
+  }
+
+  runApp(MyApp(initializationError: initError));
 }
 
+
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String? initializationError;
+
+  const MyApp({super.key, this.initializationError});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Quiz App Travel',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
+    if (initializationError != null) {
+      return MaterialApp(
+        title: 'Quiz App Travel - Error',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        home: Scaffold(
+          backgroundColor: const Color(0xFFF7F9FB),
+          body: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline_rounded,
+                    size: 80,
+                    color: Color(0xFFBA1A1A),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'App Initialization Failed',
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF00475E),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFBA1A1A).withValues(alpha: 0.3)),
+                    ),
+                    child: Text(
+                      initializationError!,
+                      style: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  const Text(
+                    'Please verify your Firebase config in firebase_options.dart and rebuild.',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final appRouter = getIt<AppRouter>();
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => getIt<AuthViewModel>()),
+        ChangeNotifierProvider(create: (_) => getIt<PlayerSetupViewModel>()),
+        ChangeNotifierProvider(create: (_) => getIt<CreateRoomViewModel>()),
+        ChangeNotifierProvider(create: (_) => getIt<JoinRoomViewModel>()),
+        ChangeNotifierProvider(create: (_) => getIt<BrowseQuestsViewModel>()),
+        ChangeNotifierProvider(create: (_) => getIt<LobbyViewModel>()),
+        ChangeNotifierProvider(create: (_) => getIt<QuizPlayViewModel>()),
+        ChangeNotifierProvider(create: (_) => getIt<HostControlViewModel>()),
+        ChangeNotifierProvider(create: (_) => getIt<OpenChestViewModel>()),
+        ChangeNotifierProvider(create: (_) => getIt<LeaderboardViewModel>()),
+      ],
+      child: MaterialApp.router(
+        title: 'Quiz App Travel',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        routerConfig: appRouter.router,
       ),
-      home: const WelcomeScreen(),
     );
   }
 }
+
+
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});

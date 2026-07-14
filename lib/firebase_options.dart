@@ -22,12 +22,13 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'PLACEHOLDER_API_KEY',
-    appId: '1:1234567890:web:1234567890',
-    messagingSenderId: '1234567890',
-    projectId: 'quiz-app-travel-placeholder',
-    authDomain: 'quiz-app-travel-placeholder.firebaseapp.com',
-    storageBucket: 'quiz-app-travel-placeholder.appspot.com',
+    apiKey: 'AIzaSyBZM0oISCLcUGcmbwRILZgOVH2rHd_Jx_k',
+    appId: '1:58793994198:web:c2fba42442a5c286332677',
+    messagingSenderId: '58793994198',
+    projectId: 'quizapptravel',
+    authDomain: 'quizapptravel.firebaseapp.com',
+    storageBucket: 'quizapptravel.firebasestorage.app',
+    measurementId: 'G-52H0M4QDTN',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
