@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'core/di/di.dart';
+import 'core/routes/app_router.dart';
 import 'firebase_options.dart';
+import 'package:quiz_app_travel/features/quiz/presentation/viewmodels/quiz_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,14 +26,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Quiz App Travel',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: getIt<QuizViewModel>()),
+      ],
+      child: MaterialApp.router(
+        title: 'Quiz App Travel',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+          useMaterial3: true,
+        ),
+        routerConfig: appRouter,
       ),
-      home: const WelcomeScreen(),
     );
   }
 }
@@ -65,23 +74,26 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
-              const Text(
-                'This project is configured with a modular Feature-First Clean/MVVM Architecture and integrated with Firebase.',
-                style: TextStyle(fontSize: 16, color: Colors.black54),
-                textAlign: TextAlign.center,
-              ),
               const SizedBox(height: 32),
               ElevatedButton.icon(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Firebase & DI initialized successfully!'),
-                    ),
-                  );
+                  context.push('/join');
                 },
-                icon: const Icon(Icons.check_circle_outline),
-                label: const Text('Check Status'),
+                icon: const Icon(Icons.login),
+                label: const Text('Join a Quest'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () {
+                  context.push('/host-waiting');
+                },
+                icon: const Icon(Icons.admin_panel_settings),
+                label: const Text('Admin Room'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   foregroundColor: Colors.white,

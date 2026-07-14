@@ -1,51 +1,30 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:quiz_app_travel/features/quiz/application/services/i_quiz_service.dart';
+import 'package:quiz_app_travel/features/quiz/application/services/quiz_service.dart';
+import 'package:quiz_app_travel/features/quiz/data/datasource/quiz_remote_data_source.dart';
+import 'package:quiz_app_travel/features/quiz/data/repositories/quiz_repository_impl.dart';
+import 'package:quiz_app_travel/features/quiz/domain/repositories/i_quiz_repository.dart';
+import 'package:quiz_app_travel/features/quiz/presentation/viewmodels/quiz_viewmodel.dart';
 
 final getIt = GetIt.instance;
 
 Future<void> setupDependencies() async {
-  // ==========================================
-  // 1. External / Firebase Services
-  // ==========================================
-  getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
-  getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
-  getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
+  // Data sources
+  getIt.registerLazySingleton<QuizRemoteDataSource>(() => QuizRemoteDataSource());
 
-  // ==========================================
-  // 2. Feature: Auth
-  // ==========================================
-  // Data Sources
-  // getIt.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSource(getIt()));
-  
   // Repositories
-  // getIt.registerLazySingleton<IAuthRepository>(() => AuthRepositoryImpl(getIt()));
+  getIt.registerLazySingleton<IQuizRepository>(
+    () => QuizRepositoryImpl(getIt<QuizRemoteDataSource>()),
+  );
 
-  // ViewModels
-  // getIt.registerFactory(() => AuthViewModel(getIt()));
+  // Services
+  getIt.registerLazySingleton<IQuizService>(
+    () => QuizService(getIt<IQuizRepository>()),
+  );
 
-  // ==========================================
-  // 3. Feature: Quiz
-  // ==========================================
-  // Data Sources
-  // getIt.registerLazySingleton<QuizRemoteDataSource>(() => QuizRemoteDataSource(getIt()));
-  
-  // Repositories
-  // getIt.registerLazySingleton<IQuizRepository>(() => QuizRepositoryImpl(getIt()));
-
-  // ViewModels
-  // getIt.registerFactory(() => QuizViewModel(getIt()));
-
-  // ==========================================
-  // 4. Feature: Travel
-  // ==========================================
-  // Data Sources
-  // getIt.registerLazySingleton<TravelRemoteDataSource>(() => TravelRemoteDataSource(getIt()));
-  
-  // Repositories
-  // getIt.registerLazySingleton<ITravelRepository>(() => TravelRepositoryImpl(getIt()));
-
-  // ViewModels
-  // getIt.registerFactory(() => TravelViewModel(getIt()));
+  // ViewModels (Use Factory so it creates a new instance, or LazySingleton if you want a global state)
+  // For a game, global state or scoped state is fine. Let's use LazySingleton for easy access.
+  getIt.registerLazySingleton<QuizViewModel>(
+    () => QuizViewModel(getIt<IQuizService>()),
+  );
 }
