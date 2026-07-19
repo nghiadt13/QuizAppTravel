@@ -4,7 +4,7 @@ import '../../features/auth/presentation/viewmodels/auth_view_model.dart';
 import '../../features/auth/presentation/views/login_screen.dart';
 import '../../features/home/presentation/views/home_shell_screen.dart';
 import '../../features/home/presentation/views/leaderboard_tab_screen.dart';
-import '../../features/home/presentation/views/passport_tab_screen.dart';
+import '../../features/home/presentation/views/profile_tab_screen.dart';
 import '../../features/home/presentation/views/quests_tab_screen.dart';
 import '../../features/home/presentation/views/shop_tab_screen.dart';
 import '../../features/live_monitoring/presentation/views/host_control_screen.dart';
@@ -24,6 +24,13 @@ class AppRouter {
       final authViewModel = getIt<AuthViewModel>();
       final isLoggedIn = authViewModel.isAuthenticated;
       final isLoggingIn = state.uri.toString() == '/login';
+
+      if (!isLoggedIn && !isLoggingIn) {
+        final path = state.uri.toString();
+        if (path.startsWith('/home') || path == '/') {
+          return '/login';
+        }
+      }
 
       if (isLoggedIn && isLoggingIn) {
         return '/home/quests';
@@ -47,12 +54,12 @@ class AppRouter {
             builder: (context, state) => const LeaderboardTabScreen(),
           ),
           GoRoute(
-            path: '/home/passport',
-            builder: (context, state) => const PassportTabScreen(),
-          ),
-          GoRoute(
             path: '/home/shop',
             builder: (context, state) => const ShopTabScreen(),
+          ),
+          GoRoute(
+            path: '/home/profile',
+            builder: (context, state) => const ProfileTabScreen(),
           ),
         ],
       ),

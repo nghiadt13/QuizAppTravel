@@ -17,4 +17,5 @@ abstract interface class IQuestRoomRepository {
   Future<void> removeParticipant(String roomId, String playerId);
   Future<List<PresetAvatar>> fetchPresetAvatars();
   Future<List<QuestRoom>> fetchActivePublicRooms();
+  Future<List<QuestRoom>> getRoomsByHost(String hostId);
 }

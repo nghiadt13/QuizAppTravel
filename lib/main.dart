@@ -16,6 +16,7 @@ import 'features/quiz_game/presentation/viewmodels/quiz_play_view_model.dart';
 import 'features/live_monitoring/presentation/viewmodels/host_control_view_model.dart';
 import 'features/reward/presentation/viewmodels/open_chest_view_model.dart';
 import 'features/leaderboard/presentation/viewmodels/leaderboard_view_model.dart';
+import 'features/home/presentation/viewmodels/profile_view_model.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -140,6 +141,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => getIt<HostControlViewModel>()),
         ChangeNotifierProvider(create: (_) => getIt<OpenChestViewModel>()),
         ChangeNotifierProvider(create: (_) => getIt<LeaderboardViewModel>()),
+        ChangeNotifierProvider(create: (_) => getIt<ProfileViewModel>()),
       ],
       child: MaterialApp.router(
         title: 'Quiz App Travel',

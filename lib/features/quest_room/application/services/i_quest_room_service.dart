@@ -20,4 +20,5 @@ abstract interface class IQuestRoomService {
   Future<void> leaveRoom(String roomId, String playerId);
   Future<List<PresetAvatar>> getPresetAvatars();
   Future<List<QuestRoom>> getActivePublicRooms();
+  Future<List<QuestRoom>> getRoomsByHost(String hostId);
 }

@@ -97,4 +97,10 @@ class QuestRoomRepositoryImpl implements IQuestRoomRepository {
     final list = await _remoteDataSource.fetchActivePublicRooms();
     return list.map((dto) => _roomMapper.map(dto)).toList();
   }
+
+  @override
+  Future<List<QuestRoom>> getRoomsByHost(String hostId) async {
+    final list = await _remoteDataSource.fetchRoomsByHost(hostId);
+    return list.map((dto) => _roomMapper.map(dto)).toList();
+  }
 }

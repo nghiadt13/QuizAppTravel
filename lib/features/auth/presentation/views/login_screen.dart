@@ -20,6 +20,7 @@ class LoginScreen extends StatelessWidget {
             backgroundColor: colors.error,
           ),
         );
+        viewModel.clearError();
       });
     }
 
@@ -95,7 +96,24 @@ class LoginScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     if (viewModel.isLoading)
-                      const CircularProgressIndicator()
+                      Column(
+                        children: [
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: () {
+                              viewModel.resetLoadingState();
+                            },
+                            child: Text(
+                              'Cancel Sign In',
+                              style: TextStyle(
+                                color: colors.error,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
                     else
                       ElevatedButton(
                         onPressed: () async {

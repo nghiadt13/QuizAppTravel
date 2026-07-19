@@ -14,6 +14,7 @@ import '../../features/auth/domain/repositories/i_auth_repository.dart';
 import '../../features/auth/application/services/i_auth_service.dart';
 import '../../features/auth/application/services/auth_service_impl.dart';
 import '../../features/auth/presentation/viewmodels/auth_view_model.dart';
+import '../../features/home/presentation/viewmodels/profile_view_model.dart';
 
 // Quest Room Feature imports
 import '../../features/quest_room/data/datasources/preset_avatar_data_source.dart';
@@ -115,7 +116,7 @@ Future<void> setupDependencies() async {
   );
 
   // ViewModels
-  getIt.registerFactory(() => AuthViewModel(getIt()));
+  getIt.registerLazySingleton<AuthViewModel>(() => AuthViewModel(getIt()));
 
   // ==========================================
   // 3. Feature: Quiz
@@ -263,4 +264,5 @@ Future<void> setupDependencies() async {
 
   // ViewModels
   getIt.registerFactory(() => LeaderboardViewModel(getIt()));
+  getIt.registerFactory(() => ProfileViewModel(getIt(), getIt()));
 }

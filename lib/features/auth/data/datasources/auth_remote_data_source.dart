@@ -37,17 +37,53 @@ class AuthRemoteDataSourceImpl implements IAuthRemoteDataSource {
 
       if (kIsWeb) {
         // Web flow: Use browser popup to authenticate with Firebase Auth directly
-        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
-        final UserCredential userCredential = await _firebaseAuth.signInWithPopup(googleProvider);
-        firebaseUser = userCredential.user;
-        if (firebaseUser != null) {
-          displayName = firebaseUser.displayName;
-          email = firebaseUser.email;
-          avatarUrl = firebaseUser.photoURL;
+        try {
+          final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+          final UserCredential userCredential = await _firebaseAuth.signInWithPopup(googleProvider);
+          firebaseUser = userCredential.user;
+          if (firebaseUser != null) {
+            displayName = firebaseUser.displayName;
+            email = firebaseUser.email;
+            avatarUrl = firebaseUser.photoURL;
+          }
+        } catch (e) {
+          if (e is AppException) rethrow;
+
+          // Check if this is a cancellation error (popup closed or cancelled by user)
+          bool isCancellation = false;
+          if (e is FirebaseAuthException) {
+            isCancellation = e.code == 'popup-closed-by-user' ||
+                             e.code == 'web-context-cancelled' ||
+                             e.code == 'auth/popup-closed-by-user' ||
+                             e.code == 'cancelled-popup-request' ||
+                             e.code == 'auth/cancelled-popup-request';
+          }
+          
+          if (!isCancellation) {
+            final errStr = e.toString().toLowerCase();
+            isCancellation = errStr.contains('popup-closed-by-user') ||
+                             errStr.contains('cancelled') ||
+                             errStr.contains('closed-by-user') ||
+                             errStr.contains('user-cancelled');
+          }
+
+          if (isCancellation) {
+            throw const AppException('Sign in was cancelled.', code: 'cancelled');
+          }
+          
+          rethrow;
         }
       } else {
         // Mobile flow: Use native Google Sign-In SDK
+        // ignore: unnecessary_null_comparison, The native side can return null
+        // on some Android devices when the user dismisses the dialog, even though
+        // the Dart type signature is non-nullable.
         final googleUser = await _googleSignIn.authenticate();
+        // ignore: unnecessary_null_comparison, dead_code
+        if (googleUser == null) {
+          throw const AppException('Sign in was cancelled.');
+        }
+
         final GoogleSignInAuthentication googleAuth = googleUser.authentication;
         final String? idToken = googleAuth.idToken;
         if (idToken == null) {

@@ -118,6 +118,15 @@ class QuestRoomServiceImpl implements IQuestRoomService {
     return _repository.fetchActivePublicRooms();
   }
 
+  @override
+  Future<List<QuestRoom>> getRoomsByHost(String hostId) async {
+    final trimmedId = hostId.trim();
+    if (trimmedId.isEmpty) {
+      throw const AppException('Host ID cannot be empty.');
+    }
+    return _repository.getRoomsByHost(trimmedId);
+  }
+
   String _generateRandomPin() {
     final random = Random();
     final buffer = StringBuffer();

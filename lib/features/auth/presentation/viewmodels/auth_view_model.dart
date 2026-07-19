@@ -27,28 +27,43 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<void> signInWithGoogle() async {
+    if (_isLoading) return;
+
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      print('[AuthVM] Starting sign in...');
       _currentUser = await _service.signInWithGoogle();
-      print('[AuthVM] Sign in successful: ${_currentUser?.email}');
     } on AppException catch (e) {
-      print('[AuthVM] AppException: ${e.message}');
-      _errorMessage = e.message;
+      // If user cancelled, don't show error — just reset the button
+      if (e.message != 'Sign in was cancelled.' && e.code != 'cancelled') {
+        _errorMessage = e.message;
+      }
     } catch (e) {
-      print('[AuthVM] Error: $e');
       _errorMessage = 'An error occurred during Google Sign-In.';
     } finally {
       _isLoading = false;
-      print('[AuthVM] Notifying listeners...');
+      notifyListeners();
+    }
+  }
+
+  void resetLoadingState() {
+    _isLoading = false;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  void clearError() {
+    if (_errorMessage != null) {
+      _errorMessage = null;
       notifyListeners();
     }
   }
 
   Future<void> signOut() async {
+    if (_isLoading) return;
+
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();

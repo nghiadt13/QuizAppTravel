@@ -18,10 +18,10 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
     if (location.startsWith('/home/leaderboard')) {
       return 1;
     }
-    if (location.startsWith('/home/passport')) {
+    if (location.startsWith('/home/shop')) {
       return 2;
     }
-    if (location.startsWith('/home/shop')) {
+    if (location.startsWith('/home/profile')) {
       return 3;
     }
     return 0;
@@ -36,10 +36,10 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
         context.go('/home/leaderboard');
         break;
       case 2:
-        context.go('/home/passport');
+        context.go('/home/shop');
         break;
       case 3:
-        context.go('/home/shop');
+        context.go('/home/profile');
         break;
     }
   }
@@ -89,17 +89,17 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                 _buildNavItem(
                   index: 2,
                   selectedIndex: selectedIndex,
-                  activeIcon: Icons.style,
-                  inactiveIcon: Icons.style_outlined,
-                  label: 'Passport',
+                  activeIcon: Icons.card_giftcard,
+                  inactiveIcon: Icons.card_giftcard_outlined,
+                  label: 'Shop',
                   context: context,
                 ),
                 _buildNavItem(
                   index: 3,
                   selectedIndex: selectedIndex,
-                  activeIcon: Icons.card_giftcard,
-                  inactiveIcon: Icons.card_giftcard_outlined,
-                  label: 'Shop',
+                  activeIcon: Icons.person,
+                  inactiveIcon: Icons.person_outline,
+                  label: 'Profile',
                   context: context,
                 ),
               ],

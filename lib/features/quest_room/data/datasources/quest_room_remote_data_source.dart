@@ -17,6 +17,7 @@ abstract interface class IQuestRoomRemoteDataSource {
   Future<void> updateRoomStatus(String roomId, String status);
   Future<void> removeParticipant(String roomId, String playerId);
   Future<List<QuestRoomDto>> fetchActivePublicRooms();
+  Future<List<QuestRoomDto>> fetchRoomsByHost(String hostId);
 }
 
 class QuestRoomRemoteDataSourceImpl implements IQuestRoomRemoteDataSource {
@@ -158,6 +159,27 @@ class QuestRoomRemoteDataSourceImpl implements IQuestRoomRemoteDataSource {
           .toList();
     } on FirebaseException catch (e) {
       throw AppException(e.message ?? 'Failed to fetch public quests.', code: e.code);
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<QuestRoomDto>> fetchRoomsByHost(String hostId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('rooms')
+          .where('hostId', isEqualTo: hostId)
+          .get();
+
+      final list = snapshot.docs
+          .map((doc) => QuestRoomDto.fromFirestore(doc.data(), doc.id))
+          .toList();
+
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return list;
+    } on FirebaseException catch (e) {
+      throw AppException(e.message ?? 'Failed to fetch host quests.', code: e.code);
     } catch (e) {
       throw AppException(e.toString());
     }
