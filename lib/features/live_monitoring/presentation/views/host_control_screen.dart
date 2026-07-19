@@ -34,14 +34,14 @@ class _HostControlScreenState extends State<HostControlScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('End Game?'),
+        title: const Text('Kết Thúc Trò Chơi?'),
         content: const Text(
-          'This will force the quiz to close for all participants and finalize their rankings. Are you sure?',
+          'Hành động này sẽ đóng phòng thi đấu cho tất cả người chơi và chốt bảng xếp hạng chung cuộc. Bạn có chắc chắn muốn kết thúc?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text('Hủy'),
           ),
           TextButton(
             onPressed: () {
@@ -49,7 +49,7 @@ class _HostControlScreenState extends State<HostControlScreen> {
               vm.endGame();
             },
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('End Game'),
+            child: const Text('Kết Thúc'),
           ),
         ],
       ),
@@ -64,7 +64,7 @@ class _HostControlScreenState extends State<HostControlScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          'Host Control Panel 🎛️',
+          'Bảng Điều Khiển Chủ Phòng 🎛️',
           style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
         ),
         centerTitle: true,
@@ -92,7 +92,7 @@ class _HostControlScreenState extends State<HostControlScreen> {
                         const Icon(Icons.error_outline, size: 64, color: AppColors.error),
                         const SizedBox(height: 16),
                         Text(
-                          'Error loading dashboard',
+                          'Lỗi nạp bảng điều khiển',
                           style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
                         ),
                         const SizedBox(height: 8),
@@ -100,7 +100,7 @@ class _HostControlScreenState extends State<HostControlScreen> {
                         const SizedBox(height: 24),
                         ElevatedButton(
                           onPressed: () => vm.init(widget.roomId, 4),
-                          child: const Text('Retry'),
+                          child: const Text('Thử lại'),
                         ),
                       ],
                     ),
@@ -128,14 +128,15 @@ class _HostControlScreenState extends State<HostControlScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Live Player Progress',
+                      'Tiến Độ Người Chơi Thời Gian Thực 📊',
                       style: AppTextStyles.headlineSmall.copyWith(
                         color: AppColors.primary,
-                        fontSize: 18,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
-                      '${vm.players.length} active',
+                      '${vm.players.length} người chơi',
                       style: AppTextStyles.labelSmall.copyWith(
                         color: AppColors.outline,
                         fontWeight: FontWeight.bold,
@@ -150,7 +151,7 @@ class _HostControlScreenState extends State<HostControlScreen> {
                 child: vm.players.isEmpty
                     ? Center(
                         child: Text(
-                          'No players have joined the monitoring room yet.',
+                          'Chưa có người chơi nào tham gia bảng theo dõi.',
                           style: AppTextStyles.bodyMedium.copyWith(color: AppColors.outline),
                         ),
                       )

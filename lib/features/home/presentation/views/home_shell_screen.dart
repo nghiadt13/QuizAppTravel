@@ -73,9 +73,9 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                 _buildNavItem(
                   index: 0,
                   selectedIndex: selectedIndex,
-                  activeIcon: Icons.map,
-                  inactiveIcon: Icons.map_outlined,
-                  label: 'Quests',
+                  activeIcon: Icons.quiz,
+                  inactiveIcon: Icons.quiz_outlined,
+                  label: 'Trò Chơi',
                   context: context,
                 ),
                 _buildNavItem(
@@ -83,7 +83,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                   selectedIndex: selectedIndex,
                   activeIcon: Icons.bar_chart,
                   inactiveIcon: Icons.bar_chart_outlined,
-                  label: 'Leaderboard',
+                  label: 'Xếp Hạng',
                   context: context,
                 ),
                 _buildNavItem(
@@ -91,7 +91,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                   selectedIndex: selectedIndex,
                   activeIcon: Icons.card_giftcard,
                   inactiveIcon: Icons.card_giftcard_outlined,
-                  label: 'Shop',
+                  label: 'Cửa Hàng',
                   context: context,
                 ),
                 _buildNavItem(
@@ -99,7 +99,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                   selectedIndex: selectedIndex,
                   activeIcon: Icons.person,
                   inactiveIcon: Icons.person_outline,
-                  label: 'Profile',
+                  label: 'Cá Nhân',
                   context: context,
                 ),
               ],

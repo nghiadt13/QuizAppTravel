@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../auth/presentation/viewmodels/auth_view_model.dart';
+import '../../../quiz/presentation/viewmodels/quiz_manager_view_model.dart';
 import '../viewmodels/create_room_view_model.dart';
 
 class CreateRoomScreen extends StatefulWidget {
@@ -14,20 +15,18 @@ class CreateRoomScreen extends StatefulWidget {
 }
 
 class _CreateRoomScreenState extends State<CreateRoomScreen> {
-  final TextEditingController _topicController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
-    _topicController.addListener(() {
-      context.read<CreateRoomViewModel>().setTopic(_topicController.text);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authVm = context.read<AuthViewModel>();
+      final hostId = authVm.currentUser?.uid;
+      if (hostId != null) {
+        context.read<QuizManagerViewModel>().fetchMyQuizzes(hostId);
+      }
+      context.read<QuizManagerViewModel>().fetchPublicQuizzes();
+      context.read<CreateRoomViewModel>().resetSelection();
     });
-  }
-
-  @override
-  void dispose() {
-    _topicController.dispose();
-    super.dispose();
   }
 
   Future<void> _onCreateRoom() async {
@@ -36,13 +35,23 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
 
     if (hostId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Host is not logged in. Please sign in first.')),
+        const SnackBar(content: Text('Chủ phòng chưa đăng nhập. Vui lòng đăng nhập trước.')),
       );
       context.go('/login');
       return;
     }
 
     final createVm = context.read<CreateRoomViewModel>();
+    if (createVm.selectedQuizId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng chọn một bộ câu hỏi bên dưới để mở phòng.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     final room = await createVm.createRoom(hostId);
     if (room != null && mounted) {
       context.replace('/lobby/${room.id}');
@@ -52,17 +61,19 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
   @override
   Widget build(BuildContext context) {
     final createVm = context.watch<CreateRoomViewModel>();
+    final quizVm = context.watch<QuizManagerViewModel>();
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          'Host a Quest',
+          'Tạo Phòng Game',
           style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: const IconThemeData(color: AppColors.primary),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -71,7 +82,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Launch a New Quest! 🚀',
+                'Mở Phòng Game Mới! 🚀',
                 style: AppTextStyles.displayLargeMobile.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
@@ -80,7 +91,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Pick a topic, configure room options, and invite your friends.',
+                'Chọn chủ đề, cấu hình các tùy chọn và mời bạn bè tham gia nhé.',
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.onSurfaceVariant,
                 ),
@@ -90,71 +101,194 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
 
               // Topic Input
               Text(
-                'QUEST TOPIC',
+                'CHỌN BỘ CÂU HỎI ĐỂ CHƠI',
                 style: AppTextStyles.labelMedium.copyWith(
                   color: AppColors.primary,
                   letterSpacing: 1.2,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Title: BỘ CÂU HỎI CỦA BẠN
+              Text(
+                'BỘ CÂU HỎI CỦA BẠN',
+                style: AppTextStyles.labelSmall.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
-              TextField(
-                controller: _topicController,
-                decoration: InputDecoration(
-                  hintText: 'Enter custom topic name...',
-                  filled: true,
-                  fillColor: Colors.white,
-                  prefixIcon: const Icon(Icons.edit_road_outlined, color: AppColors.primary),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppColors.outlineVariant),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                  ),
-                ),
-                style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 24),
 
-              // Preset Topics Grid / Wrap
+              if (quizVm.myQuizzes.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.orange.withValues(alpha: 0.2)),
+                  ),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Bạn chưa có bộ câu hỏi tự tạo nào.',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.orange),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Hãy vào tab Cá nhân để tạo bộ câu hỏi riêng độc quyền!',
+                        style: TextStyle(fontSize: 11, color: Colors.black54),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                )
+              else
+                SizedBox(
+                  height: 130,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: quizVm.myQuizzes.length,
+                    itemBuilder: (context, index) {
+                      final quiz = quizVm.myQuizzes[index];
+                      final isSelected = createVm.selectedQuizId == quiz.id;
+
+                      return GestureDetector(
+                        onTap: () => createVm.selectQuiz(quiz.id, quiz.title),
+                        child: Container(
+                          width: 200,
+                          margin: const EdgeInsets.only(right: 12, bottom: 4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isSelected ? AppColors.secondary : Colors.black.withValues(alpha: 0.05),
+                              width: isSelected ? 3 : 1,
+                            ),
+                            image: quiz.imageUrl != null
+                                ? DecorationImage(
+                                    image: NetworkImage(quiz.imageUrl!),
+                                    fit: BoxFit.cover,
+                                    colorFilter: ColorFilter.mode(
+                                      Colors.black.withValues(alpha: 0.4),
+                                      BlendMode.darken,
+                                    ),
+                                  )
+                                : null,
+                            color: quiz.imageUrl == null ? AppColors.primary : null,
+                          ),
+                          alignment: Alignment.bottomLeft,
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                quiz.title,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                '${quiz.questions.length} câu hỏi',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              const SizedBox(height: 16),
+
+              // Title: BỘ CÂU HỎI HỆ THỐNG / CÔNG KHAI
               Text(
-                'OR CHOOSE A POPULAR TOPIC',
-                style: AppTextStyles.labelMedium.copyWith(
+                'BỘ CÂU HỎI HỆ THỐNG / CÔNG KHAI',
+                style: AppTextStyles.labelSmall.copyWith(
                   color: AppColors.onSurfaceVariant,
-                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: createVm.presetTopics.map((topic) {
-                  final isSelected = createVm.topic == topic;
-                  return ChoiceChip(
-                    label: Text(topic),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      if (selected) {
-                        _topicController.text = topic;
-                        createVm.setTopic(topic);
-                      }
+              const SizedBox(height: 8),
+
+              if (quizVm.publicQuizzes.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(child: Text('Không có bộ câu hỏi công khai.')),
+                )
+              else
+                SizedBox(
+                  height: 130,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: quizVm.publicQuizzes.length,
+                    itemBuilder: (context, index) {
+                      final quiz = quizVm.publicQuizzes[index];
+                      final isSelected = createVm.selectedQuizId == quiz.id;
+
+                      return GestureDetector(
+                        onTap: () => createVm.selectQuiz(quiz.id, quiz.title),
+                        child: Container(
+                          width: 200,
+                          margin: const EdgeInsets.only(right: 12, bottom: 4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isSelected ? AppColors.secondary : Colors.black.withValues(alpha: 0.05),
+                              width: isSelected ? 3 : 1,
+                            ),
+                            image: quiz.imageUrl != null
+                                ? DecorationImage(
+                                    image: NetworkImage(quiz.imageUrl!),
+                                    fit: BoxFit.cover,
+                                    colorFilter: ColorFilter.mode(
+                                      Colors.black.withValues(alpha: 0.4),
+                                      BlendMode.darken,
+                                    ),
+                                  )
+                                : null,
+                            color: quiz.imageUrl == null ? AppColors.primary : null,
+                          ),
+                          alignment: Alignment.bottomLeft,
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                quiz.title,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                '${quiz.questions.length} câu hỏi',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
                     },
-                    selectedColor: AppColors.primaryContainer,
-                    backgroundColor: Colors.white,
-                    labelStyle: AppTextStyles.labelMedium.copyWith(
-                      color: isSelected ? Colors.white : AppColors.primary,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(
-                        color: isSelected ? Colors.transparent : AppColors.outlineVariant,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 32),
+                  ),
+                ),
+              const SizedBox(height: 24),
 
               // Public Toggle
               Card(
@@ -166,14 +300,14 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                 ),
                 child: SwitchListTile(
                   title: Text(
-                    'Public Room',
+                    'Phòng Công Khai',
                     style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
                     ),
                   ),
                   subtitle: Text(
-                    'Allows other players to see and join your room from public lobby listings.',
+                    'Cho phép người chơi khác nhìn thấy và tham gia vào phòng chơi của bạn từ danh sách phòng công khai.',
                     style: AppTextStyles.labelSmall.copyWith(
                       color: AppColors.onSurfaceVariant,
                     ),
@@ -221,7 +355,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                         ),
                       )
                     : Text(
-                        'Create Room & Open Lobby',
+                        'Tạo Phòng & Mở Phòng Chờ',
                         style: AppTextStyles.bodyLarge.copyWith(
                           fontWeight: FontWeight.bold,
                         ),

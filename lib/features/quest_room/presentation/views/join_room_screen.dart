@@ -25,7 +25,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
       if (playerSetupVm.displayName == null || playerSetupVm.avatarId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Please set up your profile name and avatar before joining a room.'),
+            content: Text('Vui lòng thiết lập biệt danh và avatar trước khi tham gia phòng.'),
             backgroundColor: AppColors.coralOrange,
           ),
         );
@@ -37,7 +37,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
   Future<void> _onJoin() async {
     if (_pinCode.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a 6-digit PIN.')),
+        const SnackBar(content: Text('Vui lòng nhập mã PIN hợp lệ.')),
       );
       return;
     }
@@ -69,7 +69,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          'Join a Quest',
+          'Vào Phòng Game',
           style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
         ),
         centerTitle: true,
@@ -94,7 +94,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
             children: [
               const SizedBox(height: 16),
               Text(
-                'Enter Quest PIN 🔑',
+                'Nhập PIN Phòng 🔑',
                 style: AppTextStyles.displayLargeMobile.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
@@ -103,7 +103,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Type the 6-digit room code shared by the host to enter the game.',
+                'Nhập mã phòng được chia sẻ bởi chủ phòng để tham gia trò chơi.',
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.onSurfaceVariant,
                 ),
@@ -138,7 +138,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Playing as: ${playerSetupVm.displayName ?? "No Name"}',
+                          'Chơi dưới tên: ${playerSetupVm.displayName ?? "Vô danh"}',
                           style: AppTextStyles.labelMedium.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.bold,
@@ -148,7 +148,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                       TextButton(
                         onPressed: () => context.push('/player-setup'),
                         child: Text(
-                          'Edit Profile',
+                          'Sửa Hồ Sơ',
                           style: AppTextStyles.labelSmall.copyWith(
                             color: AppColors.coralOrange,
                             fontWeight: FontWeight.bold,
@@ -196,7 +196,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                         ),
                       )
                     : Text(
-                        'Join Quest Room',
+                        'Tham Gia Phòng',
                         style: AppTextStyles.bodyLarge.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -209,11 +209,11 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                 onPressed: () => context.push('/browse-quests'),
                 child: RichText(
                   text: TextSpan(
-                    text: "Don't have a PIN? ",
+                    text: "Không có mã PIN? ",
                     style: AppTextStyles.bodyMedium.copyWith(color: AppColors.outline),
                     children: [
                       TextSpan(
-                        text: 'Browse Public Quests',
+                        text: 'Xem các phòng công khai',
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: AppColors.coralOrange,
                           fontWeight: FontWeight.bold,

@@ -12,6 +12,7 @@ class QuestRoom {
   final RoomStatus status;
   final bool isPublic;
   final DateTime createdAt;
+  final String? quizId;
 
   const QuestRoom({
     required this.id,
@@ -21,5 +22,6 @@ class QuestRoom {
     required this.status,
     required this.isPublic,
     required this.createdAt,
+    this.quizId,
   });
 }

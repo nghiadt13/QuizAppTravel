@@ -54,9 +54,9 @@ class GameSummaryCards extends StatelessWidget {
           context,
           icon: Icons.check_circle_outline,
           iconColor: AppColors.tertiaryContainer,
-          title: 'Finished',
+          title: 'Hoàn thành',
           value: ratioText,
-          subtitle: 'players done',
+          subtitle: 'người chơi xong',
         ),
 
         // Bento Card 2: Time Remaining
@@ -64,9 +64,9 @@ class GameSummaryCards extends StatelessWidget {
           context,
           icon: Icons.timer_outlined,
           iconColor: AppColors.coralOrange,
-          title: 'Time Left',
+          title: 'Thời gian',
           value: timeStr,
-          subtitle: timeRemaining <= 30 ? 'closing soon!' : 'minutes remaining',
+          subtitle: timeRemaining <= 30 ? 'sắp hết giờ!' : 'phút còn lại',
         ),
 
         // Bento Card 3: Current Question Progress
@@ -74,9 +74,9 @@ class GameSummaryCards extends StatelessWidget {
           context,
           icon: Icons.trending_up,
           iconColor: AppColors.primary,
-          title: 'Progress',
+          title: 'Tiến độ',
           value: '$progressPercentage%',
-          subtitle: 'average complete',
+          subtitle: 'trung bình xong',
         ),
       ],
     );

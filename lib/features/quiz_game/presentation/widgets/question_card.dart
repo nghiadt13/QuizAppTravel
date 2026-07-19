@@ -49,9 +49,9 @@ class QuestionCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Tiny travel indicator
+                // Tiny quiz indicator
                 const Icon(
-                  Icons.card_travel_outlined,
+                  Icons.lightbulb_outline,
                   color: AppColors.primary,
                   size: 20,
                 ),
@@ -106,7 +106,7 @@ class QuestionCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'Quiz Landmark',
+                            'Quiz Challenge',
                             style: AppTextStyles.labelSmall.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,

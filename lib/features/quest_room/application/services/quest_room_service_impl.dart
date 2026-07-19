@@ -16,6 +16,7 @@ class QuestRoomServiceImpl implements IQuestRoomService {
     required String topic,
     required String hostId,
     required bool isPublic,
+    String? quizId,
   }) async {
     final cleanTopic = topic.trim();
     if (cleanTopic.isEmpty) {
@@ -45,6 +46,7 @@ class QuestRoomServiceImpl implements IQuestRoomService {
       hostId: hostId,
       isPublic: isPublic,
       pinCode: pinCode,
+      quizId: quizId,
     );
   }
 
@@ -59,13 +61,19 @@ class QuestRoomServiceImpl implements IQuestRoomService {
     final cleanName = displayName.trim();
 
     if (cleanPin.length != 6) {
-      throw const AppException('PIN code must be exactly 6 digits.');
+      throw const AppException('PIN code must be 6 digits.');
     }
     if (cleanName.isEmpty) {
       throw const AppException('Name cannot be empty.');
     }
 
-    final room = await _repository.findRoomByPin(cleanPin);
+    var room = await _repository.findRoomByPin(cleanPin);
+    if (room == null) {
+      final strippedPin = cleanPin.replaceFirst(RegExp(r'^0+'), '');
+      if (strippedPin.isNotEmpty && strippedPin != cleanPin) {
+        room = await _repository.findRoomByPin(strippedPin);
+      }
+    }
     if (room == null) {
       throw const AppException('Quest room not found or has already started.', code: 'NOT_FOUND');
     }
@@ -125,6 +133,15 @@ class QuestRoomServiceImpl implements IQuestRoomService {
       throw const AppException('Host ID cannot be empty.');
     }
     return _repository.getRoomsByHost(trimmedId);
+  }
+
+  @override
+  Future<void> deleteRoom(String roomId) async {
+    final trimmedId = roomId.trim();
+    if (trimmedId.isEmpty) {
+      throw const AppException('Room ID cannot be empty.');
+    }
+    await _repository.deleteRoom(trimmedId);
   }
 
   String _generateRandomPin() {

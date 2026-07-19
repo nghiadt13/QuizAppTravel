@@ -40,6 +40,13 @@ import '../../features/quiz_game/domain/repositories/i_quiz_repository.dart';
 import '../../features/quiz_game/application/services/i_quiz_service.dart';
 import '../../features/quiz_game/application/services/quiz_service_impl.dart';
 import '../../features/quiz_game/presentation/viewmodels/quiz_play_view_model.dart';
+import '../../features/quiz/data/datasources/quiz_manager_remote_data_source.dart';
+import '../../features/quiz/data/mappers/quiz_mapper.dart';
+import '../../features/quiz/data/repositories/quiz_manager_repository_impl.dart';
+import '../../features/quiz/domain/repositories/i_quiz_manager_repository.dart';
+import '../../features/quiz/application/services/i_quiz_manager_service.dart';
+import '../../features/quiz/application/services/quiz_manager_service_impl.dart';
+import '../../features/quiz/presentation/viewmodels/quiz_manager_view_model.dart';
 
 // Live Monitoring Feature imports
 import '../../features/live_monitoring/data/datasources/monitoring_remote_data_source.dart';
@@ -121,29 +128,40 @@ Future<void> setupDependencies() async {
   // ==========================================
   // 3. Feature: Quiz
   // ==========================================
-  // Mapper
+  // Mappers
   getIt.registerLazySingleton<QuizQuestionMapper>(() => QuizQuestionMapper());
+  getIt.registerLazySingleton<QuizMapper>(() => QuizMapper());
 
   // Data Sources
   getIt.registerLazySingleton<IQuizRemoteDataSource>(
     () => QuizRemoteDataSourceImpl(getIt()),
+  );
+  getIt.registerLazySingleton<IQuizManagerRemoteDataSource>(
+    () => QuizManagerRemoteDataSourceImpl(getIt()),
   );
   
   // Repositories
   getIt.registerLazySingleton<IQuizRepository>(
     () => QuizRepositoryImpl(getIt(), getIt()),
   );
+  getIt.registerLazySingleton<IQuizManagerRepository>(
+    () => QuizManagerRepositoryImpl(getIt(), getIt()),
+  );
 
   // Services
   getIt.registerLazySingleton<IQuizService>(
     () => QuizServiceImpl(getIt()),
   );
+  getIt.registerLazySingleton<IQuizManagerService>(
+    () => QuizManagerServiceImpl(getIt()),
+  );
 
   // ViewModels
   getIt.registerFactory(() => QuizPlayViewModel(getIt()));
+  getIt.registerFactory(() => QuizManagerViewModel(getIt()));
 
   // ==========================================
-  // 4. Feature: Travel
+  // 4. Feature: Reward
   // ==========================================
   // Data Sources
   // getIt.registerLazySingleton<TravelRemoteDataSource>(() => TravelRemoteDataSource(getIt()));

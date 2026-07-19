@@ -74,7 +74,7 @@ class QuestCardTile extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Host: $displayHostId',
+                          'Chủ phòng: $displayHostId',
                           style: AppTextStyles.labelSmall.copyWith(
                             color: AppColors.outline,
                           ),
@@ -87,7 +87,7 @@ class QuestCardTile extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Public',
+                          'Công khai',
                           style: AppTextStyles.labelSmall.copyWith(
                             color: AppColors.tertiary,
                           ),
@@ -111,7 +111,7 @@ class QuestCardTile extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Join',
+                  'Vào',
                   style: AppTextStyles.labelMedium.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

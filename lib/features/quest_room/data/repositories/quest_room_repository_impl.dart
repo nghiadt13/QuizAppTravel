@@ -30,12 +30,14 @@ class QuestRoomRepositoryImpl implements IQuestRoomRepository {
     required String hostId,
     required bool isPublic,
     required String pinCode,
+    String? quizId,
   }) async {
     final dto = await _remoteDataSource.createRoom(
       topic: topic,
       hostId: hostId,
       isPublic: isPublic,
       pinCode: pinCode,
+      quizId: quizId,
     );
     return _roomMapper.map(dto);
   }
@@ -102,5 +104,10 @@ class QuestRoomRepositoryImpl implements IQuestRoomRepository {
   Future<List<QuestRoom>> getRoomsByHost(String hostId) async {
     final list = await _remoteDataSource.fetchRoomsByHost(hostId);
     return list.map((dto) => _roomMapper.map(dto)).toList();
+  }
+
+  @override
+  Future<void> deleteRoom(String roomId) async {
+    await _remoteDataSource.deleteRoom(roomId);
   }
 }

@@ -27,6 +27,7 @@ class QuestRoomMapper implements IMapper<QuestRoomDto, QuestRoom> {
       status: roomStatus,
       isPublic: source.isPublic,
       createdAt: source.createdAt,
+      quizId: source.quizId,
     );
   }
 }

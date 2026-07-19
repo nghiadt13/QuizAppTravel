@@ -47,11 +47,11 @@ class LeaderboardRemoteDataSourceImpl implements ILeaderboardRemoteDataSource {
       if (snapshot.docs.isEmpty && lastUserId == null) {
         // Fallback default mock rankings if Firestore is empty
         return [
-          LeaderboardEntryDto(userId: 'u1', displayName: 'Linh Explorer', totalScore: 12450, gamesPlayed: 32, lastPlayed: DateTime.now()),
-          LeaderboardEntryDto(userId: 'u2', displayName: 'Alex Voyager', totalScore: 10200, gamesPlayed: 28, lastPlayed: DateTime.now()),
-          LeaderboardEntryDto(userId: 'u3', displayName: 'Minh GlobeTrotter', totalScore: 9850, gamesPlayed: 25, lastPlayed: DateTime.now()),
-          LeaderboardEntryDto(userId: 'u4', displayName: 'Sophia Nomad', totalScore: 8400, gamesPlayed: 20, lastPlayed: DateTime.now()),
-          LeaderboardEntryDto(userId: 'u5', displayName: 'John Wayfarer', totalScore: 7150, gamesPlayed: 18, lastPlayed: DateTime.now()),
+          LeaderboardEntryDto(userId: 'u1', displayName: 'Linh Pro', totalScore: 12450, gamesPlayed: 32, lastPlayed: DateTime.now()),
+          LeaderboardEntryDto(userId: 'u2', displayName: 'Alex Star', totalScore: 10200, gamesPlayed: 28, lastPlayed: DateTime.now()),
+          LeaderboardEntryDto(userId: 'u3', displayName: 'Minh Ace', totalScore: 9850, gamesPlayed: 25, lastPlayed: DateTime.now()),
+          LeaderboardEntryDto(userId: 'u4', displayName: 'Sophia Bright', totalScore: 8400, gamesPlayed: 20, lastPlayed: DateTime.now()),
+          LeaderboardEntryDto(userId: 'u5', displayName: 'John Swift', totalScore: 7150, gamesPlayed: 18, lastPlayed: DateTime.now()),
         ];
       }
 
@@ -113,7 +113,7 @@ class LeaderboardRemoteDataSourceImpl implements ILeaderboardRemoteDataSource {
         final doc = await transaction.get(docRef);
         if (!doc.exists) {
           transaction.set(docRef, {
-            'displayName': 'Traveler',
+            'displayName': 'Player',
             'totalScore': scoreChange,
             'gamesPlayed': 1,
             'lastPlayed': FieldValue.serverTimestamp(),

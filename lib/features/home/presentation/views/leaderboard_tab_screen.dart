@@ -65,7 +65,7 @@ class _LeaderboardTabScreenState extends State<LeaderboardTabScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          'Leaderboard 🏆',
+          'Bảng Xếp Hạng 🏆',
           style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
         ),
         centerTitle: true,
@@ -92,7 +92,7 @@ class _LeaderboardTabScreenState extends State<LeaderboardTabScreen> {
                     Expanded(
                       child: _buildPeriodChip(
                         context,
-                        label: 'July Season',
+                        label: 'Mùa Tháng 7',
                         value: '2026-07',
                         currentValue: vm.period,
                         userId: userId,
@@ -102,7 +102,7 @@ class _LeaderboardTabScreenState extends State<LeaderboardTabScreen> {
                     Expanded(
                       child: _buildPeriodChip(
                         context,
-                        label: 'All Time',
+                        label: 'Tất Cả',
                         value: 'all-time',
                         currentValue: vm.period,
                         userId: userId,
@@ -138,7 +138,7 @@ class _LeaderboardTabScreenState extends State<LeaderboardTabScreen> {
                               ),
                               const SizedBox(height: 16),
                               const Text(
-                                'No entries found',
+                                'Chưa có xếp hạng',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primary,
@@ -165,7 +165,7 @@ class _LeaderboardTabScreenState extends State<LeaderboardTabScreen> {
                               // Leaderboard list heading
                               if (restRankings.isNotEmpty) ...[
                                 Text(
-                                  'Global Standings',
+                                  'Bảng Điểm Toàn Cầu',
                                   style: AppTextStyles.headlineSmall.copyWith(
                                     color: AppColors.primary,
                                     fontSize: 18,

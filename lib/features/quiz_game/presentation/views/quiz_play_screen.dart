@@ -11,6 +11,10 @@ import '../../presentation/widgets/answer_option_tile.dart';
 import '../../presentation/widgets/feedback_toast.dart';
 import '../../presentation/widgets/hint_button.dart';
 import '../../../../features/quest_room/presentation/viewmodels/player_setup_view_model.dart';
+import '../../../../core/di/di.dart';
+import '../../../../features/quest_room/application/services/i_quest_room_service.dart';
+import '../../../../features/quest_room/domain/entities/participant.dart';
+import '../../../../features/leaderboard/application/services/i_leaderboard_service.dart';
 
 class QuizPlayScreen extends StatefulWidget {
   final String roomId;
@@ -42,6 +46,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   @override
   Widget build(BuildContext context) {
     final quizVm = context.watch<QuizPlayViewModel>();
+    final authVm = context.watch<AuthViewModel>();
+    final playerSetupVm = context.watch<PlayerSetupViewModel>();
+    final userId = authVm.currentUser?.uid ?? playerSetupVm.playerId ?? 'anonymous';
 
     if (quizVm.isLoading) {
       return const Scaffold(
@@ -53,7 +60,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
               CircularProgressIndicator(),
               SizedBox(height: 16),
               Text(
-                'Preparing your quest...',
+                'Đang tải câu hỏi...',
                 style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w500),
               ),
             ],
@@ -74,7 +81,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                 const Icon(Icons.error_outline, size: 64, color: AppColors.error),
                 const SizedBox(height: 16),
                 Text(
-                  'Quest Error',
+                  'Lỗi tải câu hỏi',
                   style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
                 ),
                 const SizedBox(height: 8),
@@ -88,7 +95,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                   onPressed: () {
                     quizVm.loadQuestions(widget.roomId);
                   },
-                  child: const Text('Try Again'),
+                  child: const Text('Thử lại'),
                 ),
               ],
             ),
@@ -99,8 +106,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
 
     if (quizVm.questions.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Quiz Play')),
-        body: const Center(child: Text('No questions found.')),
+        appBar: AppBar(title: const Text('Vòng Thi')),
+        body: const Center(child: Text('Không tìm thấy câu hỏi.')),
       );
     }
 
@@ -109,21 +116,19 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
       return Scaffold(
         backgroundColor: AppColors.background,
         body: SafeArea(
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Spacer(),
                 const Text(
                   '🏆',
-                  style: TextStyle(fontSize: 80),
+                  style: TextStyle(fontSize: 64),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Text(
-                  'Quest Completed!',
+                  'Trận đấu hoàn thành!',
                   style: AppTextStyles.displayLargeMobile.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
@@ -132,68 +137,232 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'You traveled far and tested your knowledge. Here is your final score:',
+                  'Chúc mừng! Bạn đã hoàn thành bài thi.',
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.onSurfaceVariant,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 
                 // Score Box
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: AppColors.outlineVariant),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.05),
-                        blurRadius: 16,
+                        color: AppColors.primary.withValues(alpha: 0.04),
+                        blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  child: Column(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        'TOTAL SCORE',
-                        style: AppTextStyles.labelSmall.copyWith(
-                          color: AppColors.outline,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${quizVm.score}',
-                        style: AppTextStyles.displayLarge.copyWith(
-                          color: AppColors.secondary, // Sunny Yellow Gold
-                          fontWeight: FontWeight.w900,
-                          fontSize: 64,
-                        ),
-                      ),
-                      Text(
-                        'points',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.outline,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Column(
+                        children: [
+                          Text(
+                            'TỔNG ĐIỂM CỦA BẠN',
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: AppColors.outline,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${quizVm.score} pts',
+                            style: AppTextStyles.headlineMedium.copyWith(
+                              color: AppColors.secondary, // Sunny Yellow Gold
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-                
-                const Spacer(),
-                
-                // Reward Claim Button
-                ElevatedButton(
-                  onPressed: () {
-                    context.replace('/reward/${widget.roomId}');
+                const SizedBox(height: 32),
+
+                // Live room scoreboard section
+                Row(
+                  children: [
+                    const Icon(Icons.analytics_outlined, color: AppColors.primary, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'BẢNG XẾP HẠNG PHÒNG GAME',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                StreamBuilder<List<Participant>>(
+                  stream: getIt<IQuestRoomService>().watchParticipants(widget.roomId),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Text(
+                          'Không thể tải bảng điểm thời gian thực.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.red, fontSize: 13),
+                        ),
+                      );
+                    }
+                    if (!snapshot.hasData) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+
+                    final participants = List<Participant>.from(snapshot.data!);
+                    // Sort participants by score descending, then by joinedAt
+                    participants.sort((a, b) {
+                      final scoreComparison = b.score.compareTo(a.score);
+                      if (scoreComparison != 0) return scoreComparison;
+                      return a.joinedAt.compareTo(b.joinedAt);
+                    });
+
+                    return Card(
+                      elevation: 0,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(color: AppColors.primary.withValues(alpha: 0.08)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: participants.length,
+                          separatorBuilder: (context, index) => Divider(
+                            color: AppColors.primary.withValues(alpha: 0.05),
+                            height: 1,
+                          ),
+                          itemBuilder: (context, index) {
+                            final p = participants[index];
+                            final isMe = p.playerId == userId;
+                            final rank = index + 1;
+                            
+                            Widget rankWidget;
+                            if (rank == 1) {
+                              rankWidget = const Text('🥇', style: TextStyle(fontSize: 20));
+                            } else if (rank == 2) {
+                              rankWidget = const Text('🥈', style: TextStyle(fontSize: 20));
+                            } else if (rank == 3) {
+                              rankWidget = const Text('🥉', style: TextStyle(fontSize: 20));
+                            } else {
+                              rankWidget = Container(
+                                width: 24,
+                                height: 24,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(alpha: 0.05),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Text(
+                                  '$rank',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary.withValues(alpha: 0.6),
+                                  ),
+                                ),
+                              );
+                            }
+
+                            final emoji = _getEmoji(p.avatarId);
+                            final avatarBg = _getAvatarBg(p.avatarId);
+
+                            return Container(
+                              color: isMe ? AppColors.primary.withValues(alpha: 0.03) : Colors.transparent,
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                              child: Row(
+                                children: [
+                                  rankWidget,
+                                  const SizedBox(width: 12),
+                                  
+                                  CircleAvatar(
+                                    radius: 16,
+                                    backgroundColor: avatarBg,
+                                    child: Text(emoji, style: const TextStyle(fontSize: 16)),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  
+                                  Expanded(
+                                    child: Text(
+                                      p.displayName + (isMe ? ' (Bạn)' : ''),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: isMe ? FontWeight.bold : FontWeight.normal,
+                                        color: isMe ? AppColors.primary : AppColors.onSurface,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        '${p.score} pts',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: isMe ? AppColors.secondary : AppColors.primary,
+                                        ),
+                                      ),
+                                      if (p.status == ParticipantStatus.playing)
+                                        Text(
+                                          'Đang trả lời...',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: AppColors.onSurfaceVariant.withValues(alpha: 0.6),
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    );
                   },
+                ),
+                const SizedBox(height: 32),
+                
+                // Finish Game & Back to Home Button
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final score = quizVm.score;
+                    final router = GoRouter.of(context);
+                    if (userId.isNotEmpty && userId != 'anonymous') {
+                      try {
+                        final period = _getCurrentPeriod();
+                        await getIt<ILeaderboardService>().submitGameScore(period, userId, score);
+                      } catch (_) {}
+                    }
+                    router.go('/home/quests');
+                  },
+                  icon: const Icon(Icons.home_rounded, size: 22),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.tertiaryContainer, // Lush Green
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     elevation: 3,
@@ -201,10 +370,11 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Text(
-                    'Claim Reward & Finish',
+                  label: Text(
+                    'HOÀN THÀNH & VỀ TRANG CHỦ',
                     style: AppTextStyles.bodyLarge.copyWith(
                       fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
@@ -222,7 +392,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          'Quiz Challenge',
+          'Đấu Trường Quiz',
           style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
         ),
         centerTitle: true,
@@ -271,14 +441,14 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Keep going!',
+                            'Cố lên!',
                             style: AppTextStyles.labelSmall.copyWith(
                               color: AppColors.outline,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
-                            'Speed bonus active ⚡',
+                            'Điểm tốc độ kích hoạt ⚡',
                             style: AppTextStyles.labelSmall.copyWith(
                               color: AppColors.tertiary,
                               fontWeight: FontWeight.bold,
@@ -352,8 +522,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                   ),
                   child: Text(
                     quizVm.currentQuestionIndex < quizVm.questions.length - 1
-                        ? 'Next Question'
-                        : 'Finish Quest',
+                        ? 'Câu tiếp theo'
+                        : 'Hoàn thành',
                     style: AppTextStyles.bodyLarge.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -387,5 +557,34 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
         ),
       ),
     );
+  }
+
+  String _getEmoji(String avatarUrl) {
+    switch (avatarUrl.toLowerCase()) {
+      case 'dog': return '🐶';
+      case 'cat': return '🐱';
+      case 'bird': return '🐦';
+      case 'rabbit': return '🐰';
+      case 'fox': return '🦊';
+      case 'owl': return '🦉';
+      default: return '👤';
+    }
+  }
+
+  Color _getAvatarBg(String avatarUrl) {
+    switch (avatarUrl.toLowerCase()) {
+      case 'dog': return const Color(0xFFFFECE0);
+      case 'cat': return const Color(0xFFE8F5E9);
+      case 'bird': return const Color(0xFFE3F2FD);
+      case 'rabbit': return const Color(0xFFF3E5F5);
+      case 'fox': return const Color(0xFFFFF3E0);
+      case 'owl': return const Color(0xFFECEFF1);
+      default: return AppColors.surfaceVariant;
+    }
+  }
+
+  String _getCurrentPeriod() {
+    final now = DateTime.now();
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}';
   }
 }

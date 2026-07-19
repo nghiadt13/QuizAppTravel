@@ -7,7 +7,7 @@ class ShopTabScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('🎁 Shop'),
+        title: const Text('🎁 Cửa Hàng'),
       ),
       body: Center(
         child: Padding(
@@ -18,7 +18,7 @@ class ShopTabScreen extends StatelessWidget {
               const Icon(Icons.storefront_outlined, size: 80, color: Color(0xFFFB8C00)),
               const SizedBox(height: 16),
               Text(
-                'Travel Shop',
+                'Cửa Hàng Quiz',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       color: const Color(0xFFFB8C00),
                       fontWeight: FontWeight.bold,
@@ -26,7 +26,7 @@ class ShopTabScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Exchange your TravelCoins for special custom avatars and powerups.',
+                'Đổi xu của bạn lấy các avatar đặc biệt và vật phẩm tăng sức mạnh.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.black54),
               ),

@@ -16,6 +16,8 @@ class BrowseQuestsScreen extends StatefulWidget {
 }
 
 class _BrowseQuestsScreenState extends State<BrowseQuestsScreen> {
+  bool _isJoining = false;
+
   @override
   void initState() {
     super.initState();
@@ -31,7 +33,7 @@ class _BrowseQuestsScreenState extends State<BrowseQuestsScreen> {
     if (playerSetupVm.displayName == null || playerSetupVm.avatarId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please set up your profile name and avatar first.'),
+          content: Text('Vui lòng thiết lập biệt danh và avatar trước.'),
           backgroundColor: AppColors.coralOrange,
         ),
       );
@@ -41,30 +43,32 @@ class _BrowseQuestsScreenState extends State<BrowseQuestsScreen> {
 
     playerSetupVm.generatePlayerId();
 
-    // Show loading overlay
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
-    );
+    setState(() => _isJoining = true);
 
-    final room = await joinVm.joinRoom(
-      pinCode: pinCode,
-      displayName: playerSetupVm.displayName!,
-      avatarId: playerSetupVm.avatarId!,
-      playerId: playerSetupVm.playerId!,
-    );
-
-    if (mounted) {
-      context.pop(); // Pop loading dialog
-    }
-
-    if (room != null && mounted) {
-      context.replace('/lobby/${room.id}');
-    } else if (joinVm.errorMessage != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(joinVm.errorMessage!)),
+    try {
+      final room = await joinVm.joinRoom(
+        pinCode: pinCode,
+        displayName: playerSetupVm.displayName!,
+        avatarId: playerSetupVm.avatarId!,
+        playerId: playerSetupVm.playerId!,
       );
+
+      if (mounted) {
+        if (room != null) {
+          context.replace('/lobby/${room.id}');
+        } else {
+          setState(() => _isJoining = false);
+          if (joinVm.errorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(joinVm.errorMessage!)),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isJoining = false);
+      }
     }
   }
 
@@ -76,7 +80,7 @@ class _BrowseQuestsScreenState extends State<BrowseQuestsScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          'Public Quests',
+          'Phòng Game Công Khai',
           style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
         ),
         centerTitle: true,
@@ -99,17 +103,19 @@ class _BrowseQuestsScreenState extends State<BrowseQuestsScreen> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: browseVm.fetchPublicRooms,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: RefreshIndicator(
+              onRefresh: browseVm.fetchPublicRooms,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 16),
                 Text(
-                  'Browse Active Lobbies 🌐',
+                  'Danh Sách Phòng Chờ 🌐',
                   style: AppTextStyles.displayLargeMobile.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
@@ -118,7 +124,7 @@ class _BrowseQuestsScreenState extends State<BrowseQuestsScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Find open multiplayer lobbies and test your travel knowledge together.',
+                  'Tìm các phòng chơi nhiều người đang mở và cùng thử thách kiến thức nhé.',
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.onSurfaceVariant,
                   ),
@@ -149,7 +155,7 @@ class _BrowseQuestsScreenState extends State<BrowseQuestsScreen> {
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  'No Active Public Quests',
+                                  'Không có phòng chơi công khai',
                                   style: AppTextStyles.headlineMedium.copyWith(
                                     color: AppColors.primary,
                                   ),
@@ -157,7 +163,7 @@ class _BrowseQuestsScreenState extends State<BrowseQuestsScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'There are no public games waiting for players right now. Go host one yourself!',
+                                  'Hiện tại không có phòng game nào đang mở cửa chờ người chơi. Hãy tự tạo một phòng mới ngay nhé!',
                                   style: AppTextStyles.bodyMedium.copyWith(
                                     color: AppColors.onSurfaceVariant,
                                   ),
@@ -175,7 +181,7 @@ class _BrowseQuestsScreenState extends State<BrowseQuestsScreen> {
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                    child: const Text('Host a Quest'),
+                                    child: const Text('Tạo phòng game'),
                                   ),
                                 ),
                               ],
@@ -195,6 +201,31 @@ class _BrowseQuestsScreenState extends State<BrowseQuestsScreen> {
             ),
           ),
         ),
+      ),
+      if (_isJoining)
+            Container(
+              color: Colors.black.withValues(alpha: 0.45),
+              child: const Center(
+                child: Card(
+                  color: Colors.white,
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(color: AppColors.primary),
+                        SizedBox(height: 16),
+                        Text(
+                          'Đang tham gia phòng game...',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -51,6 +51,24 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> deleteRoom(String roomId, String uid) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _roomService.deleteRoom(roomId);
+      _userRooms = await _roomService.getRoomsByHost(uid);
+    } on AppException catch (e) {
+      _errorMessage = e.message;
+    } catch (e) {
+      _errorMessage = 'Failed to delete room.';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void clearError() {
     if (_errorMessage != null) {
       _errorMessage = null;

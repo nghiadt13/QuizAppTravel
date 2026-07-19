@@ -40,7 +40,7 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Reward added to your passport/wallet! 🎒'),
+          content: Text('Phần thưởng đã được thêm vào ví của bạn! 🎒'),
           backgroundColor: AppColors.tertiaryContainer,
         ),
       );
@@ -58,7 +58,7 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
       backgroundColor: const Color(0xFFF4EBE1), // Vintage parchment background
       appBar: AppBar(
         title: Text(
-          'Treasure Room',
+          'Phòng Kho Báu',
           style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
         ),
         centerTitle: true,
@@ -99,7 +99,7 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
 
                   // Stage Header
                   Text(
-                    vm.isOpened ? 'Treasure Found! 🎉' : 'Claim Your Loot! 🎁',
+                    vm.isOpened ? 'Tìm Thấy Kho Báu! 🎉' : 'Nhận Phần Thưởng! 🎁',
                     style: AppTextStyles.displayLargeMobile.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
@@ -109,8 +109,8 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
                   const SizedBox(height: 8),
                   Text(
                     vm.isOpened
-                        ? 'Congratulations! You unlocked a special travel reward.'
-                        : 'Tap the legendary treasure chest 3 times to unlock your rewards.',
+                        ? 'Chúc mừng! Bạn đã mở khóa một phần thưởng đặc biệt.'
+                        : 'Chạm 3 lần vào rương kho báu huyền thoại để mở khóa phần thưởng.',
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.onSurfaceVariant,
                     ),
@@ -145,7 +145,7 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
                           if (!vm.isOpened) ...[
                             const SizedBox(height: 12),
                             Text(
-                              'TAPS: ${vm.tapCount}/3',
+                              'GÕ: ${vm.tapCount}/3',
                               style: AppTextStyles.headlineSmall.copyWith(
                                 color: AppColors.coralOrange,
                                 fontWeight: FontWeight.w900,
@@ -192,7 +192,7 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
                         child: vm.isLoading
                             ? const CircularProgressIndicator()
                             : Text(
-                                'Add to Passport Wallet',
+                                'Thêm Vào Ví',
                                 style: AppTextStyles.bodyLarge.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -213,7 +213,7 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
                           ),
                         ),
                         child: Text(
-                          'View Season Leaderboard',
+                          'Xem Bảng Xếp Hạng Mùa',
                           style: AppTextStyles.bodyLarge.copyWith(
                             fontWeight: FontWeight.bold,
                           ),

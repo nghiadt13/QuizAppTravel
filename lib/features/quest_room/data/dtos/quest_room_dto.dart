@@ -9,6 +9,8 @@ class QuestRoomDto {
   final bool isPublic;
   final DateTime createdAt;
 
+  final String? quizId;
+
   const QuestRoomDto({
     required this.id,
     required this.pinCode,
@@ -17,6 +19,7 @@ class QuestRoomDto {
     required this.status,
     required this.isPublic,
     required this.createdAt,
+    this.quizId,
   });
 
   factory QuestRoomDto.fromFirestore(Map<String, dynamic> json, String id) {
@@ -30,6 +33,7 @@ class QuestRoomDto {
       createdAt: json['createdAt'] != null
           ? (json['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
+      quizId: json['quizId'] as String?,
     );
   }
 
@@ -41,6 +45,7 @@ class QuestRoomDto {
       'status': status,
       'isPublic': isPublic,
       'createdAt': FieldValue.serverTimestamp(),
+      'quizId': quizId,
     };
   }
 }

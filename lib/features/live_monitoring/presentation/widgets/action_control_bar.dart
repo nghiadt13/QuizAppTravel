@@ -50,8 +50,8 @@ class ActionControlBar extends StatelessWidget {
               ),
               label: Text(
                 isFinished
-                    ? 'Quiz Closed'
-                    : (isPlaying ? 'Pause Quiz' : 'Resume Quiz'),
+                    ? 'Đã kết thúc'
+                    : (isPlaying ? 'Tạm dừng' : 'Tiếp tục'),
                 style: AppTextStyles.labelMedium.copyWith(
                   fontWeight: FontWeight.bold,
                   color: isFinished ? AppColors.outline : Colors.white,
@@ -80,7 +80,7 @@ class ActionControlBar extends StatelessWidget {
                 color: isFinished ? AppColors.outline : AppColors.error,
               ),
               label: Text(
-                'End Game',
+                'Kết thúc',
                 style: AppTextStyles.labelMedium.copyWith(
                   fontWeight: FontWeight.bold,
                   color: isFinished ? AppColors.outline : AppColors.error,

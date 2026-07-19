@@ -14,7 +14,9 @@ import '../../features/quest_room/presentation/views/join_room_screen.dart';
 import '../../features/quest_room/presentation/views/browse_quests_screen.dart';
 import '../../features/quest_room/presentation/views/lobby_screen.dart';
 import '../../features/quiz_game/presentation/views/quiz_play_screen.dart';
-import '../../features/reward/presentation/views/open_chest_screen.dart';
+import '../../features/quiz/presentation/views/create_quiz_screen.dart';
+import '../../features/quiz/presentation/views/quiz_detail_screen.dart';
+import '../../features/quiz/domain/entities/quiz_set.dart';
 
 class AppRouter {
   final GoRouter router = GoRouter(
@@ -101,10 +103,14 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/reward/:roomId',
+        path: '/create-quiz',
+        builder: (context, state) => const CreateQuizScreen(),
+      ),
+      GoRoute(
+        path: '/quiz-detail',
         builder: (context, state) {
-          final roomId = state.pathParameters['roomId'] ?? '';
-          return OpenChestScreen(roomId: roomId);
+          final quiz = state.extra as QuizSet;
+          return QuizDetailScreen(quiz: quiz);
         },
       ),
     ],

@@ -13,68 +13,76 @@ class PlayerAvatarGrid extends StatelessWidget {
     this.hostId,
   });
 
-  String _getEmoji(String id) {
-    switch (id.toLowerCase()) {
+  IconData _getAvatarIcon(String avatarId) {
+    switch (avatarId.toLowerCase()) {
       case 'dog':
-        return '🐶';
+        return Icons.pets;
       case 'cat':
-        return '🐱';
+        return Icons.pets;
       case 'bird':
-        return '🐦';
+        return Icons.flutter_dash;
       case 'rabbit':
-        return '🐰';
+        return Icons.cruelty_free;
       case 'fox':
-        return '🦊';
+        return Icons.set_meal;
       case 'owl':
-        return '🦉';
+        return Icons.pest_control;
       default:
-        return '👤';
+        return Icons.person;
     }
   }
 
-  Color _getBackgroundColor(String id) {
-    switch (id.toLowerCase()) {
+  LinearGradient _getAvatarGradient(String avatarId) {
+    switch (avatarId.toLowerCase()) {
       case 'dog':
-        return const Color(0xFFFFECE0);
+        return const LinearGradient(
+          colors: [Color(0xFFFFB74D), Color(0xFFFF9800)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
       case 'cat':
-        return const Color(0xFFE8F5E9);
+        return const LinearGradient(
+          colors: [Color(0xFF81C784), Color(0xFF4CAF50)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
       case 'bird':
-        return const Color(0xFFE3F2FD);
+        return const LinearGradient(
+          colors: [Color(0xFF64B5F6), Color(0xFF2196F3)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
       case 'rabbit':
-        return const Color(0xFFF3E5F5);
+        return const LinearGradient(
+          colors: [Color(0xFFBA68C8), Color(0xFF9C27B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
       case 'fox':
-        return const Color(0xFFFFF3E0);
+        return const LinearGradient(
+          colors: [Color(0xFFFF8A65), Color(0xFFFF5722)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
       case 'owl':
-        return const Color(0xFFECEFF1);
+        return const LinearGradient(
+          colors: [Color(0xFF90A4AE), Color(0xFF607D8B)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
       default:
-        return AppColors.surfaceVariant;
+        return LinearGradient(
+          colors: [AppColors.primaryContainer, AppColors.primary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (participants.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 32.0),
-          child: Column(
-            children: [
-              Icon(
-                Icons.people_outline,
-                size: 48,
-                color: AppColors.outline.withValues(alpha: 0.5),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Waiting for players to join...',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.outline,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _buildEmptyState();
     }
 
     return GridView.builder(
@@ -90,15 +98,166 @@ class PlayerAvatarGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         final participant = participants[index];
         final isHost = participant.playerId == hostId;
-        final emoji = _getEmoji(participant.avatarId);
-        final bg = _getBackgroundColor(participant.avatarId);
+        final icon = _getAvatarIcon(participant.avatarId);
+        final gradient = _getAvatarGradient(participant.avatarId);
 
-        return Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
+        return _PlayerCard(
+          participant: participant,
+          isHost: isHost,
+          icon: icon,
+          gradient: gradient,
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Animated waiting icon
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primaryContainer.withValues(alpha: 0.3),
+                    AppColors.primaryContainer.withValues(alpha: 0.1),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Outer ring
+                  Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.primaryContainer.withValues(alpha: 0.3),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  // Inner icon
+                  Icon(
+                    Icons.people_alt_rounded,
+                    size: 44,
+                    color: AppColors.primaryContainer.withValues(alpha: 0.6),
+                  ),
+                  // Pulse dots
+                  ...List.generate(3, (index) {
+                    return Positioned(
+                      top: 10 + (index * 8.0),
+                      right: 15 + (index * 5.0),
+                      child: Container(
+                        width: 6 - (index * 1.5),
+                        height: 6 - (index * 1.5),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryContainer.withValues(
+                            alpha: 0.4 - (index * 0.1),
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Đang chờ người chơi tham gia...',
+              style: AppTextStyles.headlineSmall.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Chia sẻ mã phòng chơi với bạn bè',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.outline,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.secondaryContainer.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: AppColors.secondaryContainer,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Chạm vào mã phía trên để sao chép',
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: AppColors.secondaryContainer,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlayerCard extends StatelessWidget {
+  final Participant participant;
+  final bool isHost;
+  final IconData icon;
+  final LinearGradient gradient;
+
+  const _PlayerCard({
+    required this.participant,
+    required this.isHost,
+    required this.icon,
+    required this.gradient,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutBack,
+      child: Card(
+        elevation: isHost ? 4 : 2,
+        shadowColor: isHost
+            ? AppColors.secondaryContainer.withValues(alpha: 0.3)
+            : AppColors.primary.withValues(alpha: 0.15),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
+            border: isHost
+                ? Border.all(
+                    color: AppColors.secondaryContainer,
+                    width: 2,
+                  )
+                : null,
           ),
-          color: AppColors.background,
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -107,54 +266,107 @@ class PlayerAvatarGrid extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // Avatar with gradient background
                     Container(
-                      width: 54,
-                      height: 54,
-                      alignment: Alignment.center,
+                      width: 58,
+                      height: 58,
                       decoration: BoxDecoration(
-                        color: bg,
+                        gradient: gradient,
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: gradient.colors.first.withValues(alpha: 0.4),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      child: Text(
-                        emoji,
-                        style: const TextStyle(fontSize: 30),
+                      child: Container(
+                        margin: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          icon,
+                          size: 28,
+                          color: gradient.colors.last,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
+                    // Name
                     Text(
                       participant.displayName,
                       style: AppTextStyles.labelMedium.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
+                        fontSize: 12,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 2),
+                    // Status indicator
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: AppColors.tertiaryContainer,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Ready',
+                          style: AppTextStyles.labelSmall.copyWith(
+                            color: AppColors.tertiaryContainer,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
+              // Host crown badge
               if (isHost)
                 Positioned(
-                  top: 6,
-                  left: 6,
+                  top: 4,
+                  left: 4,
                   child: Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: const BoxDecoration(
-                      color: AppColors.secondaryContainer, // Sunny Yellow
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFFFFD54F),
+                          Color(0xFFFFB300),
+                        ],
+                      ),
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFFB300).withValues(alpha: 0.4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: const Icon(
-                      Icons.star,
+                      Icons.star_rounded,
                       color: Colors.white,
-                      size: 10,
+                      size: 12,
                     ),
                   ),
                 ),
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

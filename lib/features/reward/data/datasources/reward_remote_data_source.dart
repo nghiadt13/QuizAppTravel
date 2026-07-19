@@ -25,23 +25,22 @@ class RewardRemoteDataSourceImpl implements IRewardRemoteDataSource {
       }
 
       // Default local pool matching weighted distribution
-      // Voucher: 20% hotel, 30% flight (weight 50)
-      // Badge: Explorer (weight 25)
+      // Voucher: 20% discount (weight 50)
+      // Badge: Champion (weight 25)
       // Coins: 50 coins (weight 15), 100 coins (weight 10)
       final pool = [
-        // Hotels
-        const TravelRewardDto(id: 'r_hotel_20', type: 'voucher', title: '20% Hotel Voucher', description: 'Save 20% on any premium partner hotel booking.', value: 20),
-        const TravelRewardDto(id: 'r_hotel_20_2', type: 'voucher', title: '20% Hotel Voucher', description: 'Save 20% on any premium partner hotel booking.', value: 20),
-        // Flights
-        const TravelRewardDto(id: 'r_flight_10', type: 'voucher', title: '10% Flight Discount', description: 'Save 10% on your next international flight.', value: 10),
-        const TravelRewardDto(id: 'r_flight_10_2', type: 'voucher', title: '10% Flight Discount', description: 'Save 10% on your next international flight.', value: 10),
-        const TravelRewardDto(id: 'r_flight_10_3', type: 'voucher', title: '10% Flight Discount', description: 'Save 10% on your next international flight.', value: 10),
+        // Vouchers
+        const TravelRewardDto(id: 'r_voucher_20', type: 'voucher', title: '20% Off Voucher', description: 'Save 20% on any premium partner service.', value: 20),
+        const TravelRewardDto(id: 'r_voucher_20_2', type: 'voucher', title: '20% Off Voucher', description: 'Save 20% on any premium partner service.', value: 20),
+        const TravelRewardDto(id: 'r_voucher_10', type: 'voucher', title: '10% Off Voucher', description: 'Save 10% on your next purchase.', value: 10),
+        const TravelRewardDto(id: 'r_voucher_10_2', type: 'voucher', title: '10% Off Voucher', description: 'Save 10% on your next purchase.', value: 10),
+        const TravelRewardDto(id: 'r_voucher_10_3', type: 'voucher', title: '10% Off Voucher', description: 'Save 10% on your next purchase.', value: 10),
         // Badges
-        const TravelRewardDto(id: 'r_badge_explorer', type: 'badge', title: 'Explorer Badge', description: 'Special collectible stamp added to your passport!', value: 0),
-        const TravelRewardDto(id: 'r_badge_explorer_2', type: 'badge', title: 'Explorer Badge', description: 'Special collectible stamp added to your passport!', value: 0),
+        const TravelRewardDto(id: 'r_badge_champion', type: 'badge', title: 'Champion Badge', description: 'Special collectible badge added to your collection!', value: 0),
+        const TravelRewardDto(id: 'r_badge_champion_2', type: 'badge', title: 'Champion Badge', description: 'Special collectible badge added to your collection!', value: 0),
         // Coins
-        const TravelRewardDto(id: 'r_coins_50', type: 'travelCoins', title: '50 TravelCoins', description: 'Added to your Travel Shop coins balance.', value: 50),
-        const TravelRewardDto(id: 'r_coins_100', type: 'travelCoins', title: '100 TravelCoins', description: 'Added to your Travel Shop coins balance.', value: 100),
+        const TravelRewardDto(id: 'r_coins_50', type: 'travelCoins', title: '50 Quiz Coins', description: 'Added to your Quiz Shop coins balance.', value: 50),
+        const TravelRewardDto(id: 'r_coins_100', type: 'travelCoins', title: '100 Quiz Coins', description: 'Added to your Quiz Shop coins balance.', value: 100),
       ];
 
       final randomIndex = Random().nextInt(pool.length);

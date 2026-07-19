@@ -56,7 +56,7 @@ class RewardCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Passport Stamp Grid Pattern
+            // Stamp Grid Pattern
             Positioned.fill(
               child: Opacity(
                 opacity: 0.03,
@@ -65,7 +65,7 @@ class RewardCard extends StatelessWidget {
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 6,
                   ),
-                  itemBuilder: (context, index) => const Icon(Icons.flight_takeoff, size: 16),
+                  itemBuilder: (context, index) => const Icon(Icons.star_outline, size: 16),
                 ),
               ),
             ),

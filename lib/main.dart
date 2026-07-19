@@ -17,6 +17,8 @@ import 'features/live_monitoring/presentation/viewmodels/host_control_view_model
 import 'features/reward/presentation/viewmodels/open_chest_view_model.dart';
 import 'features/leaderboard/presentation/viewmodels/leaderboard_view_model.dart';
 import 'features/home/presentation/viewmodels/profile_view_model.dart';
+import 'features/quiz/presentation/viewmodels/quiz_manager_view_model.dart';
+import 'core/database/database_seeder.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -29,6 +31,8 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    // Seed mock quizzes if database is empty
+    await DatabaseSeeder.seedQuizzesIfEmpty();
   } catch (e) {
     initError = 'Firebase Initialization Error: $e';
     debugPrint(initError);
@@ -65,7 +69,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     if (initializationError != null) {
       return MaterialApp(
-        title: 'Quiz App Travel - Error',
+        title: 'Quiz App - Error',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         home: Scaffold(
@@ -112,7 +116,7 @@ class MyApp extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
                   const Text(
-                    'Please verify your Firebase config in firebase_options.dart and rebuild.',
+                    'Vui lòng xác minh cấu hình Firebase của bạn trong file firebase_options.dart và xây dựng lại.',
                     style: TextStyle(
                       fontFamily: 'Inter',
                       fontSize: 14,
@@ -142,9 +146,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => getIt<OpenChestViewModel>()),
         ChangeNotifierProvider(create: (_) => getIt<LeaderboardViewModel>()),
         ChangeNotifierProvider(create: (_) => getIt<ProfileViewModel>()),
+        ChangeNotifierProvider(create: (_) => getIt<QuizManagerViewModel>()),
       ],
       child: MaterialApp.router(
-        title: 'Quiz App Travel',
+        title: 'Quiz App',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         routerConfig: appRouter.router,
@@ -162,7 +167,7 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quiz App Travel'),
+        title: const Text('Quiz App'),
         centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
@@ -173,13 +178,13 @@ class WelcomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(
-                Icons.card_travel_outlined,
+                Icons.quiz_outlined,
                 size: 100,
                 color: Colors.teal,
               ),
               const SizedBox(height: 24),
               Text(
-                'Welcome to Quiz App Travel!',
+                'Chào mừng đến với Quiz App!',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Colors.teal.shade700,
@@ -188,7 +193,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Text(
-                'This project is configured with a modular Feature-First Clean/MVVM Architecture and integrated with Firebase.',
+                'Dự án này được thiết lập theo cấu trúc Clean/MVVM Feature-First mô-đun hóa và tích hợp Firebase.',
                 style: TextStyle(fontSize: 16, color: Colors.black54),
                 textAlign: TextAlign.center,
               ),
@@ -197,12 +202,12 @@ class WelcomeScreen extends StatelessWidget {
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Firebase & DI initialized successfully!'),
+                      content: Text('Kết nối Firebase & DI thành công!'),
                     ),
                   );
                 },
                 icon: const Icon(Icons.check_circle_outline),
-                label: const Text('Check Status'),
+                label: const Text('Kiểm tra trạng thái'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   foregroundColor: Colors.white,

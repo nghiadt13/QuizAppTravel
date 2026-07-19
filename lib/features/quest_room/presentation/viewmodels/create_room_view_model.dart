@@ -23,17 +23,32 @@ class CreateRoomViewModel extends ChangeNotifier {
   QuestRoom? _createdRoom;
   QuestRoom? get createdRoom => _createdRoom;
 
+  String? _selectedQuizId;
+  String? get selectedQuizId => _selectedQuizId;
+
   final List<String> _presetTopics = [
-    'Southeast Asia Adventure',
-    'European History & Landmarks',
-    'Wonders of the World',
-    'Culinary Journeys',
-    'Tropical Islands & Beaches',
+    'General Knowledge',
+    'Science & Technology',
+    'History & Culture',
+    'Sports & Entertainment',
+    'Geography & Nature',
   ];
   List<String> get presetTopics => _presetTopics;
 
   void setTopic(String topic) {
     _topic = topic;
+    notifyListeners();
+  }
+
+  void selectQuiz(String? quizId, String quizTitle) {
+    _selectedQuizId = quizId;
+    _topic = quizTitle;
+    notifyListeners();
+  }
+
+  void resetSelection() {
+    _selectedQuizId = null;
+    _topic = '';
     notifyListeners();
   }
 
@@ -44,7 +59,7 @@ class CreateRoomViewModel extends ChangeNotifier {
 
   Future<QuestRoom?> createRoom(String hostId) async {
     if (_topic.trim().isEmpty) {
-      _errorMessage = 'Please enter or select a topic.';
+      _errorMessage = 'Vui lòng nhập hoặc chọn chủ đề.';
       notifyListeners();
       return null;
     }
@@ -59,12 +74,13 @@ class CreateRoomViewModel extends ChangeNotifier {
         topic: _topic,
         hostId: hostId,
         isPublic: _isPublic,
+        quizId: _selectedQuizId,
       );
       return _createdRoom;
     } on AppException catch (e) {
       _errorMessage = e.message;
     } catch (e) {
-      _errorMessage = 'Failed to create room. Please try again.';
+      _errorMessage = 'Không thể tạo phòng game. Vui lòng thử lại.';
     } finally {
       _isLoading = false;
       notifyListeners();

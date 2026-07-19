@@ -49,12 +49,13 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          'Player Setup',
+          'Thiết Lập Người Chơi',
           style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: const IconThemeData(color: AppColors.primary),
       ),
       body: Consumer<PlayerSetupViewModel>(
         builder: (context, vm, child) {
@@ -65,7 +66,7 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Set Up Your Profile 🧭',
+                    'Thiết Lập Hồ Sơ 🧭',
                     style: AppTextStyles.displayLargeMobile.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
@@ -74,7 +75,7 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Choose how you want to be displayed in the lobby and pick an avatar.',
+                    'Chọn biệt danh hiển thị trong phòng chờ và chọn ảnh đại diện yêu thích của bạn.',
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.onSurfaceVariant,
                     ),
@@ -84,7 +85,7 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                   
                   // Name Field
                   Text(
-                    'DISPLAY NAME',
+                    'BIỆT DANH',
                     style: AppTextStyles.labelMedium.copyWith(
                       color: AppColors.primary,
                       letterSpacing: 1.2,
@@ -94,7 +95,7 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                   TextField(
                     controller: _nameController,
                     decoration: InputDecoration(
-                      hintText: 'Enter nickname...',
+                      hintText: 'Nhập biệt danh...',
                       filled: true,
                       fillColor: Colors.white,
                       prefixIcon: const Icon(Icons.person_outline, color: AppColors.primary),
@@ -113,7 +114,7 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                   
                   // Avatar Pick
                   Text(
-                    'CHOOSE AVATAR',
+                    'CHỌN AVATAR',
                     style: AppTextStyles.labelMedium.copyWith(
                       color: AppColors.primary,
                       letterSpacing: 1.2,
@@ -162,7 +163,7 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                       ),
                     ),
                     child: Text(
-                      'Save & Continue',
+                      'Lưu & Tiếp tục',
                       style: AppTextStyles.bodyLarge.copyWith(
                         fontWeight: FontWeight.bold,
                       ),

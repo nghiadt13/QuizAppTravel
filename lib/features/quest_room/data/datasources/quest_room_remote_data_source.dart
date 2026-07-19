@@ -9,6 +9,7 @@ abstract interface class IQuestRoomRemoteDataSource {
     required String hostId,
     required bool isPublic,
     required String pinCode,
+    String? quizId,
   });
   Future<QuestRoomDto?> findRoomByPin(String pinCode);
   Future<void> joinRoom(String roomId, ParticipantDto participant);
@@ -16,6 +17,7 @@ abstract interface class IQuestRoomRemoteDataSource {
   Stream<QuestRoomDto?> watchRoom(String roomId);
   Future<void> updateRoomStatus(String roomId, String status);
   Future<void> removeParticipant(String roomId, String playerId);
+  Future<void> deleteRoom(String roomId);
   Future<List<QuestRoomDto>> fetchActivePublicRooms();
   Future<List<QuestRoomDto>> fetchRoomsByHost(String hostId);
 }
@@ -31,6 +33,7 @@ class QuestRoomRemoteDataSourceImpl implements IQuestRoomRemoteDataSource {
     required String hostId,
     required bool isPublic,
     required String pinCode,
+    String? quizId,
   }) async {
     try {
       final roomRef = _firestore.collection('rooms').doc();
@@ -42,6 +45,7 @@ class QuestRoomRemoteDataSourceImpl implements IQuestRoomRemoteDataSource {
         status: 'waiting',
         isPublic: isPublic,
         createdAt: DateTime.now(),
+        quizId: quizId,
       );
 
       await roomRef.set(roomDto.toFirestore());
@@ -180,6 +184,17 @@ class QuestRoomRemoteDataSourceImpl implements IQuestRoomRemoteDataSource {
       return list;
     } on FirebaseException catch (e) {
       throw AppException(e.message ?? 'Failed to fetch host quests.', code: e.code);
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> deleteRoom(String roomId) async {
+    try {
+      await _firestore.collection('rooms').doc(roomId).delete();
+    } on FirebaseException catch (e) {
+      throw AppException(e.message ?? 'Failed to delete room.', code: e.code);
     } catch (e) {
       throw AppException(e.toString());
     }

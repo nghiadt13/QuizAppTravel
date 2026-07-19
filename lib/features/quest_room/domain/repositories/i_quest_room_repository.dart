@@ -8,6 +8,7 @@ abstract interface class IQuestRoomRepository {
     required String hostId,
     required bool isPublic,
     required String pinCode,
+    String? quizId,
   });
   Future<QuestRoom?> findRoomByPin(String pinCode);
   Future<void> joinRoom(String roomId, Participant participant);
@@ -15,6 +16,7 @@ abstract interface class IQuestRoomRepository {
   Stream<QuestRoom?> watchRoom(String roomId);
   Future<void> updateRoomStatus(String roomId, RoomStatus status);
   Future<void> removeParticipant(String roomId, String playerId);
+  Future<void> deleteRoom(String roomId);
   Future<List<PresetAvatar>> fetchPresetAvatars();
   Future<List<QuestRoom>> fetchActivePublicRooms();
   Future<List<QuestRoom>> getRoomsByHost(String hostId);

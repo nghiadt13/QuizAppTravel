@@ -13,23 +13,23 @@ class SeasonRewardBanner extends StatelessWidget {
   });
 
   String _getRemainingTimeText(DateTime? endDate) {
-    if (endDate == null) return 'Ending soon!';
+    if (endDate == null) return 'Sắp kết thúc!';
     final now = DateTime.now();
     final difference = endDate.difference(now);
 
-    if (difference.isNegative) return 'Season ended';
+    if (difference.isNegative) return 'Mùa giải kết thúc';
 
     final days = difference.inDays;
     final hours = difference.inHours % 24;
 
     if (days > 0) {
-      return '${days}d ${hours}h left';
+      return 'Còn $days ngày $hours giờ';
     } else if (hours > 0) {
       final minutes = difference.inMinutes % 60;
-      return '${hours}h ${minutes}m left';
+      return 'Còn $hours giờ $minutes phút';
     } else {
       final minutes = difference.inMinutes;
-      return '${minutes}m left!';
+      return 'Còn $minutes phút!';
     }
   }
 
@@ -37,13 +37,13 @@ class SeasonRewardBanner extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Season Rewards 🎁'),
+        title: const Text('Phần Thưởng Mùa Giải 🎁'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Join the quest race! Increase your rank to claim exclusive real-world travel rewards.',
+              'Tham gia cuộc đua! Tăng hạng của bạn để giành những phần thưởng độc quyền.',
               style: TextStyle(height: 1.4),
             ),
             const SizedBox(height: 16),
@@ -54,7 +54,7 @@ class SeasonRewardBanner extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                rewardDescription ?? 'Top 10 players get discount flight/hotel codes!',
+                rewardDescription ?? 'Top 10 người chơi sẽ nhận được mã giảm giá độc quyền!',
                 style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
               ),
             ),
@@ -63,7 +63,7 @@ class SeasonRewardBanner extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Got it!'),
+            child: const Text('Đã hiểu!'),
           ),
         ],
       ),
@@ -73,7 +73,7 @@ class SeasonRewardBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final remainingTime = _getRemainingTimeText(seasonEndDate);
-    final desc = rewardDescription ?? 'Top players receive exclusive travel discount codes.';
+    final desc = rewardDescription ?? 'Người chơi đứng đầu sẽ nhận được mã giảm giá độc quyền.';
 
     return Card(
       elevation: 0,
@@ -110,7 +110,7 @@ class SeasonRewardBanner extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Season Ends: $remainingTime',
+                      'Kết thúc: $remainingTime',
                       style: AppTextStyles.labelMedium.copyWith(
                         color: AppColors.secondary,
                         fontWeight: FontWeight.bold,
