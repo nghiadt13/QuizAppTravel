@@ -24,6 +24,7 @@ class LobbyViewModel extends ChangeNotifier {
 
   StreamSubscription<QuestRoom?>? _roomSubscription;
   StreamSubscription<List<Participant>>? _participantsSubscription;
+  Timer? _pollingTimer;
 
   Future<void> init(String roomId, {QuestRoom? initialRoom}) async {
     _errorMessage = null;
@@ -41,12 +42,11 @@ class LobbyViewModel extends ChangeNotifier {
 
     _roomSubscription?.cancel();
     _participantsSubscription?.cancel();
+    _pollingTimer?.cancel();
 
-    // 1. Direct fetch immediately with a strict timeout so UI never hangs
+    // 1. Direct fetch immediately
     try {
-      final directRoom = await _service.getRoomById(roomId).timeout(
-        const Duration(milliseconds: 2500),
-      );
+      final directRoom = await _service.getRoomById(roomId);
       if (directRoom != null) {
         _room = directRoom;
         _isLoading = false;
@@ -55,16 +55,13 @@ class LobbyViewModel extends ChangeNotifier {
     } catch (_) {}
 
     try {
-      final directParticipants = await _service.getParticipants(roomId).timeout(
-        const Duration(milliseconds: 2500),
-      );
-      if (directParticipants.isNotEmpty) {
-        _participants = directParticipants;
-        notifyListeners();
-      }
+      final directParticipants = await _service.getParticipants(roomId);
+      _participants = directParticipants;
+      _isLoading = false;
+      notifyListeners();
     } catch (_) {}
 
-    // Safety timeout to turn off loading after 2.5 seconds
+    // Safety timer to turn off loading
     Timer(const Duration(milliseconds: 2500), () {
       if (_isLoading) {
         _isLoading = false;
@@ -72,6 +69,7 @@ class LobbyViewModel extends ChangeNotifier {
       }
     });
 
+    // 2. Stream subscriptions for realtime acceleration
     _roomSubscription = _service.watchRoom(roomId).listen(
       (room) {
         if (room != null) {
@@ -92,6 +90,7 @@ class LobbyViewModel extends ChangeNotifier {
     _participantsSubscription = _service.watchParticipants(roomId).listen(
       (participants) {
         _participants = participants;
+        _isLoading = false;
         notifyListeners();
       },
       onError: (error) {
@@ -99,6 +98,20 @@ class LobbyViewModel extends ChangeNotifier {
         notifyListeners();
       },
     );
+
+    // 3. Periodic polling every 1.5s as fallback for browser webchannel stream blocks
+    _pollingTimer = Timer.periodic(const Duration(milliseconds: 1500), (_) async {
+      try {
+        final latestParticipants = await _service.getParticipants(roomId);
+        _participants = latestParticipants;
+        final latestRoom = await _service.getRoomById(roomId);
+        if (latestRoom != null) {
+          _room = latestRoom;
+        }
+        _isLoading = false;
+        notifyListeners();
+      } catch (_) {}
+    });
   }
 
   Future<void> startQuest() async {
@@ -120,6 +133,7 @@ class LobbyViewModel extends ChangeNotifier {
       await _service.leaveRoom(_room!.id, playerId);
       _roomSubscription?.cancel();
       _participantsSubscription?.cancel();
+      _pollingTimer?.cancel();
       _room = null;
       _participants = [];
       notifyListeners();
@@ -136,6 +150,7 @@ class LobbyViewModel extends ChangeNotifier {
   void dispose() {
     _roomSubscription?.cancel();
     _participantsSubscription?.cancel();
+    _pollingTimer?.cancel();
     super.dispose();
   }
 }
