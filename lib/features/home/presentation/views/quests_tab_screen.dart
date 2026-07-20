@@ -95,9 +95,14 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
     _nicknameController = TextEditingController();
 
     _pinController.addListener(() {
+      if (mounted) setState(() {});
       if (_pinController.text.length == 6) {
         _joinGameRoom(_pinController.text, Theme.of(context).colorScheme);
       }
+    });
+
+    _pinFocusNode.addListener(() {
+      if (mounted) setState(() {});
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
