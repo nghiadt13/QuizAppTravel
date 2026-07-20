@@ -17,11 +17,13 @@ import 'features/live_monitoring/presentation/viewmodels/host_control_view_model
 import 'features/reward/presentation/viewmodels/open_chest_view_model.dart';
 import 'features/leaderboard/presentation/viewmodels/leaderboard_view_model.dart';
 import 'features/home/presentation/viewmodels/profile_view_model.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'features/quiz/presentation/viewmodels/quiz_manager_view_model.dart';
 import 'core/database/database_seeder.dart';
 import 'firebase_options.dart';
 
 void main() async {
+  usePathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
   
   String? initError;
@@ -149,9 +151,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => getIt<QuizManagerViewModel>()),
       ],
       child: MaterialApp.router(
-        title: 'Quiz App',
+        title: 'Quiz Travel 🗺️ - Đấu Trường Quiz & Du Lịch',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
         routerConfig: appRouter.router,
       ),
     );
