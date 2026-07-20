@@ -16,7 +16,11 @@ class LeaderboardRepositoryImpl implements ILeaderboardRepository {
     int limit = 20,
     String? lastUserId,
   }) async {
-    final list = await _remoteDataSource.fetchEntries(period, limit: limit, lastUserId: lastUserId);
+    final list = await _remoteDataSource.fetchEntries(
+      period,
+      limit: limit,
+      lastUserId: lastUserId,
+    );
     final metadata = await _remoteDataSource.fetchPeriodMetadata(period);
 
     final entries = <LeaderboardEntry>[];
@@ -38,21 +42,41 @@ class LeaderboardRepositoryImpl implements ILeaderboardRepository {
     final dto = await _remoteDataSource.fetchUserRank(period, userId);
     if (dto == null) return null;
 
-    final rank = await _remoteDataSource.fetchRankForScore(period, dto.totalScore);
+    final rank = await _remoteDataSource.fetchRankForScore(
+      period,
+      dto.totalScore,
+    );
     return _entryMapper.map(dto, rank);
   }
 
   @override
   Stream<LeaderboardEntry?> watchUserRank(String period, String userId) {
-    return _remoteDataSource.watchUserRank(period, userId).asyncMap((dto) async {
+    return _remoteDataSource.watchUserRank(period, userId).asyncMap((
+      dto,
+    ) async {
       if (dto == null) return null;
-      final rank = await _remoteDataSource.fetchRankForScore(period, dto.totalScore);
+      final rank = await _remoteDataSource.fetchRankForScore(
+        period,
+        dto.totalScore,
+      );
       return _entryMapper.map(dto, rank);
     });
   }
 
   @override
-  Future<void> updateScore(String period, String userId, int scoreChange) async {
-    await _remoteDataSource.updateScore(period, userId, scoreChange);
+  Future<void> updateScore(
+    String period,
+    String userId,
+    int scoreChange, {
+    required String displayName,
+    String? avatarUrl,
+  }) async {
+    await _remoteDataSource.updateScore(
+      period,
+      userId,
+      scoreChange,
+      displayName: displayName,
+      avatarUrl: avatarUrl,
+    );
   }
 }

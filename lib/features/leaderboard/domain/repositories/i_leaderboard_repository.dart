@@ -9,5 +9,11 @@ abstract interface class ILeaderboardRepository {
   });
   Future<LeaderboardEntry?> fetchUserRank(String period, String userId);
   Stream<LeaderboardEntry?> watchUserRank(String period, String userId);
-  Future<void> updateScore(String period, String userId, int scoreChange);
+  Future<void> updateScore(
+    String period,
+    String userId,
+    int scoreChange, {
+    required String displayName,
+    String? avatarUrl,
+  });
 }

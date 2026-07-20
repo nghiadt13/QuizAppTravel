@@ -11,7 +11,13 @@ abstract interface class ILeaderboardRemoteDataSource {
   });
   Future<LeaderboardEntryDto?> fetchUserRank(String period, String userId);
   Stream<LeaderboardEntryDto?> watchUserRank(String period, String userId);
-  Future<void> updateScore(String period, String userId, int scoreChange);
+  Future<void> updateScore(
+    String period,
+    String userId,
+    int scoreChange, {
+    required String displayName,
+    String? avatarUrl,
+  });
   Future<LeaderboardMetadataDto> fetchPeriodMetadata(String period);
   Future<int> fetchRankForScore(String period, int score);
 }
@@ -43,30 +49,30 @@ class LeaderboardRemoteDataSourceImpl implements ILeaderboardRemoteDataSource {
       }
 
       final snapshot = await query.limit(limit).get();
-      
-      if (snapshot.docs.isEmpty && lastUserId == null) {
-        // Fallback default mock rankings if Firestore is empty
-        return [
-          LeaderboardEntryDto(userId: 'u1', displayName: 'Linh Pro', totalScore: 12450, gamesPlayed: 32, lastPlayed: DateTime.now()),
-          LeaderboardEntryDto(userId: 'u2', displayName: 'Alex Star', totalScore: 10200, gamesPlayed: 28, lastPlayed: DateTime.now()),
-          LeaderboardEntryDto(userId: 'u3', displayName: 'Minh Ace', totalScore: 9850, gamesPlayed: 25, lastPlayed: DateTime.now()),
-          LeaderboardEntryDto(userId: 'u4', displayName: 'Sophia Bright', totalScore: 8400, gamesPlayed: 20, lastPlayed: DateTime.now()),
-          LeaderboardEntryDto(userId: 'u5', displayName: 'John Swift', totalScore: 7150, gamesPlayed: 18, lastPlayed: DateTime.now()),
-        ];
-      }
 
       return snapshot.docs
-          .map((doc) => LeaderboardEntryDto.fromFirestore(doc.data() as Map<String, dynamic>, doc.id))
+          .map(
+            (doc) => LeaderboardEntryDto.fromFirestore(
+              doc.data() as Map<String, dynamic>,
+              doc.id,
+            ),
+          )
           .toList();
     } on FirebaseException catch (e) {
-      throw AppException(e.message ?? 'Failed to fetch leaderboard entries.', code: e.code);
+      throw AppException(
+        e.message ?? 'Failed to fetch leaderboard entries.',
+        code: e.code,
+      );
     } catch (e) {
       throw AppException(e.toString());
     }
   }
 
   @override
-  Future<LeaderboardEntryDto?> fetchUserRank(String period, String userId) async {
+  Future<LeaderboardEntryDto?> fetchUserRank(
+    String period,
+    String userId,
+  ) async {
     try {
       final doc = await _firestore
           .collection('leaderboard')
@@ -80,7 +86,10 @@ class LeaderboardRemoteDataSourceImpl implements ILeaderboardRemoteDataSource {
       }
       return LeaderboardEntryDto.fromFirestore(doc.data()!, doc.id);
     } on FirebaseException catch (e) {
-      throw AppException(e.message ?? 'Failed to fetch user rank.', code: e.code);
+      throw AppException(
+        e.message ?? 'Failed to fetch user rank.',
+        code: e.code,
+      );
     } catch (e) {
       throw AppException(e.toString());
     }
@@ -95,13 +104,19 @@ class LeaderboardRemoteDataSourceImpl implements ILeaderboardRemoteDataSource {
         .doc(userId)
         .snapshots()
         .map((doc) {
-      if (!doc.exists || doc.data() == null) return null;
-      return LeaderboardEntryDto.fromFirestore(doc.data()!, doc.id);
-    });
+          if (!doc.exists || doc.data() == null) return null;
+          return LeaderboardEntryDto.fromFirestore(doc.data()!, doc.id);
+        });
   }
 
   @override
-  Future<void> updateScore(String period, String userId, int scoreChange) async {
+  Future<void> updateScore(
+    String period,
+    String userId,
+    int scoreChange, {
+    required String displayName,
+    String? avatarUrl,
+  }) async {
     try {
       final docRef = _firestore
           .collection('leaderboard')
@@ -113,7 +128,8 @@ class LeaderboardRemoteDataSourceImpl implements ILeaderboardRemoteDataSource {
         final doc = await transaction.get(docRef);
         if (!doc.exists) {
           transaction.set(docRef, {
-            'displayName': 'Player',
+            'displayName': displayName,
+            'avatarUrl': avatarUrl,
             'totalScore': scoreChange,
             'gamesPlayed': 1,
             'lastPlayed': FieldValue.serverTimestamp(),
@@ -123,6 +139,8 @@ class LeaderboardRemoteDataSourceImpl implements ILeaderboardRemoteDataSource {
           final currentScore = data['totalScore'] ?? 0;
           final currentGames = data['gamesPlayed'] ?? 0;
           transaction.update(docRef, {
+            'displayName': displayName,
+            'avatarUrl': avatarUrl,
             'totalScore': currentScore + scoreChange,
             'gamesPlayed': currentGames + 1,
             'lastPlayed': FieldValue.serverTimestamp(),
@@ -130,7 +148,10 @@ class LeaderboardRemoteDataSourceImpl implements ILeaderboardRemoteDataSource {
         }
       });
     } on FirebaseException catch (e) {
-      throw AppException(e.message ?? 'Failed to update score in transaction.', code: e.code);
+      throw AppException(
+        e.message ?? 'Failed to update score in transaction.',
+        code: e.code,
+      );
     } catch (e) {
       throw AppException(e.toString());
     }
@@ -145,7 +166,10 @@ class LeaderboardRemoteDataSourceImpl implements ILeaderboardRemoteDataSource {
       }
       return LeaderboardMetadataDto.fromFirestore(doc.data()!);
     } on FirebaseException catch (e) {
-      throw AppException(e.message ?? 'Failed to fetch period metadata.', code: e.code);
+      throw AppException(
+        e.message ?? 'Failed to fetch period metadata.',
+        code: e.code,
+      );
     } catch (e) {
       throw AppException(e.toString());
     }
@@ -162,7 +186,10 @@ class LeaderboardRemoteDataSourceImpl implements ILeaderboardRemoteDataSource {
           .get();
       return snapshot.docs.length + 1;
     } on FirebaseException catch (e) {
-      throw AppException(e.message ?? 'Failed to calculate user rank.', code: e.code);
+      throw AppException(
+        e.message ?? 'Failed to calculate user rank.',
+        code: e.code,
+      );
     } catch (e) {
       throw AppException(e.toString());
     }

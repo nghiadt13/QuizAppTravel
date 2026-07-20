@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/system_quiz_presets.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../quiz_game/domain/entities/quiz_question.dart';
 import '../../domain/entities/quiz_set.dart';
@@ -47,7 +48,7 @@ class QuizManagerViewModel extends ChangeNotifier {
         options: ['', '', '', ''],
         correctIndex: 0,
         timeLimit: 20,
-      )
+      ),
     ];
     _errorMessage = null;
     notifyListeners();
@@ -109,7 +110,11 @@ class QuizManagerViewModel extends ChangeNotifier {
     );
   }
 
-  void updateQuestionOption(int questionIndex, int optionIndex, String optionText) {
+  void updateQuestionOption(
+    int questionIndex,
+    int optionIndex,
+    String optionText,
+  ) {
     final q = _editingQuestions[questionIndex];
     final newOptions = List<String>.from(q.options);
     newOptions[optionIndex] = optionText;
@@ -175,12 +180,12 @@ class QuizManagerViewModel extends ChangeNotifier {
     try {
       final quizToSave = _editingQuiz!.copyWith(questions: _editingQuestions);
       await _service.saveQuiz(quizToSave);
-      
+
       // Reload my quizzes list
       if (quizToSave.creatorId != null) {
         await fetchMyQuizzes(quizToSave.creatorId!);
       }
-      
+
       _isLoading = false;
       notifyListeners();
       return true;
@@ -220,11 +225,14 @@ class QuizManagerViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _publicQuizzes = await _service.getPublicQuizzes();
+      final remoteQuizzes = await _service.getPublicQuizzes();
+      _publicQuizzes = _mergeWithSystemQuizzes(remoteQuizzes);
     } on AppException catch (e) {
       _errorMessage = e.message;
+      _publicQuizzes = SystemQuizPresets.quizzes;
     } catch (e) {
       _errorMessage = 'Lỗi khi tải danh sách bộ câu hỏi công khai.';
+      _publicQuizzes = SystemQuizPresets.quizzes;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -258,5 +266,16 @@ class QuizManagerViewModel extends ChangeNotifier {
       'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80', // Beach
     ];
     return covers[DateTime.now().millisecond % covers.length];
+  }
+
+  List<QuizSet> _mergeWithSystemQuizzes(List<QuizSet> remoteQuizzes) {
+    final merged = <QuizSet>[...SystemQuizPresets.quizzes];
+    for (final quiz in remoteQuizzes) {
+      final exists = merged.any((systemQuiz) => systemQuiz.id == quiz.id);
+      if (!exists) {
+        merged.add(quiz);
+      }
+    }
+    return merged;
   }
 }

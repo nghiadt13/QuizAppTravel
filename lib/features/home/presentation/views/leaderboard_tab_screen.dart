@@ -8,7 +8,6 @@ import '../../../leaderboard/presentation/viewmodels/leaderboard_view_model.dart
 import '../../../leaderboard/presentation/widgets/top_three_podium.dart';
 import '../../../leaderboard/presentation/widgets/user_sticky_card.dart';
 import '../../../leaderboard/presentation/widgets/ranked_list_item.dart';
-import '../../../leaderboard/presentation/widgets/season_reward_banner.dart';
 
 class LeaderboardTabScreen extends StatefulWidget {
   const LeaderboardTabScreen({super.key});
@@ -44,7 +43,8 @@ class _LeaderboardTabScreenState extends State<LeaderboardTabScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       if (_viewModel.hasMore && !_viewModel.isLoading) {
         _viewModel.loadLeaderboard();
       }
@@ -54,26 +54,29 @@ class _LeaderboardTabScreenState extends State<LeaderboardTabScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<LeaderboardViewModel>();
-    final authVm = context.watch<AuthViewModel>();
-    final playerSetupVm = context.watch<PlayerSetupViewModel>();
-    final userId = authVm.currentUser?.uid ?? playerSetupVm.playerId ?? '';
 
     final topThree = vm.entries.take(3).toList();
     final restRankings = vm.entries.skip(3).toList();
+    final totalGames = vm.entries.fold<int>(
+      0,
+      (sum, entry) => sum + entry.gamesPlayed,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
           'Bảng Xếp Hạng 🏆',
-          style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: AppColors.primary,
+          ),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: AppColors.primary),
+            icon: const Icon(Icons.refresh_rounded, color: AppColors.primary),
             onPressed: () => vm.loadLeaderboard(refresh: true),
           ),
         ],
@@ -81,155 +84,273 @@ class _LeaderboardTabScreenState extends State<LeaderboardTabScreen> {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () => vm.loadLeaderboard(refresh: true),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Segmented controls for switching periods
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-                child: Row(
+          child: vm.isLoading && vm.entries.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : vm.entries.isEmpty
+              ? const _EmptyLeaderboardState()
+              : ListView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
                   children: [
-                    Expanded(
-                      child: _buildPeriodChip(
-                        context,
-                        label: 'Mùa Tháng 7',
-                        value: '2026-07',
-                        currentValue: vm.period,
-                        userId: userId,
-                      ),
+                    _LeaderboardHero(
+                      totalPlayers: vm.entries.length,
+                      totalGames: totalGames,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildPeriodChip(
-                        context,
-                        label: 'Tất Cả',
-                        value: 'all-time',
-                        currentValue: vm.period,
-                        userId: userId,
-                      ),
+                    const SizedBox(height: 22),
+                    if (topThree.isNotEmpty) TopThreePodium(topThree: topThree),
+                    if (vm.userRank != null) ...[
+                      const SizedBox(height: 8),
+                      UserStickyCard(userRank: vm.userRank!),
+                    ],
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.leaderboard_rounded,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Bảng điểm tất cả người chơi',
+                            style: AppTextStyles.headlineSmall.copyWith(
+                              color: AppColors.primary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 12),
+                    ...restRankings.map(
+                      (entry) => RankedListItem(entry: entry),
+                    ),
+                    if (vm.isLoading)
+                      const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
                   ],
                 ),
-              ),
-
-              // Active season reward banner
-              if (vm.seasonEndDate != null || vm.rewardDescription != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
-                  child: SeasonRewardBanner(
-                    seasonEndDate: vm.seasonEndDate,
-                    rewardDescription: vm.rewardDescription,
-                  ),
-                ),
-
-              // Main leaderboard content
-              Expanded(
-                child: vm.isLoading && vm.entries.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
-                    : vm.entries.isEmpty
-                        ? ListView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            children: [
-                              SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-                              const Icon(
-                                Icons.emoji_events_outlined,
-                                size: 72,
-                                color: AppColors.outline,
-                              ),
-                              const SizedBox(height: 16),
-                              const Text(
-                                'Chưa có xếp hạng',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          )
-                        : ListView(
-                            controller: _scrollController,
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            children: [
-                              // Top 3 Podium
-                              if (topThree.isNotEmpty)
-                                TopThreePodium(topThree: topThree),
-
-                              // Sticky player rank banner
-                              if (vm.userRank != null) ...[
-                                UserStickyCard(userRank: vm.userRank!),
-                                const SizedBox(height: 16),
-                              ],
-
-                              // Leaderboard list heading
-                              if (restRankings.isNotEmpty) ...[
-                                Text(
-                                  'Bảng Điểm Toàn Cầu',
-                                  style: AppTextStyles.headlineSmall.copyWith(
-                                    color: AppColors.primary,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                              ],
-
-                              // Rank list item (4 and below)
-                              ...restRankings.map(
-                                (entry) => RankedListItem(entry: entry),
-                              ),
-
-                              // Loading footer for inf scroll
-                              if (vm.isLoading)
-                                const Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: Center(child: CircularProgressIndicator()),
-                                ),
-
-                              const SizedBox(height: 24),
-                            ],
-                          ),
-              ),
-            ],
-          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildPeriodChip(
-    BuildContext context, {
-    required String label,
-    required String value,
-    required String currentValue,
-    required String userId,
-  }) {
-    final isSelected = value == currentValue;
-    final vm = context.read<LeaderboardViewModel>();
+class _LeaderboardHero extends StatelessWidget {
+  final int totalPlayers;
+  final int totalGames;
 
-    return ChoiceChip(
-      label: Container(
-        alignment: Alignment.center,
-        height: 20,
-        child: Text(label),
-      ),
-      selected: isSelected,
-      onSelected: (selected) {
-        if (selected) {
-          vm.changePeriod(value, userId);
-        }
-      },
-      selectedColor: AppColors.primaryContainer,
-      backgroundColor: Colors.white,
-      labelStyle: AppTextStyles.labelMedium.copyWith(
-        color: isSelected ? Colors.white : AppColors.primary,
-        fontWeight: FontWeight.bold,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isSelected ? Colors.transparent : AppColors.outlineVariant,
+  const _LeaderboardHero({
+    required this.totalPlayers,
+    required this.totalGames,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, Color(0xFF00796B)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.18),
+            blurRadius: 22,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: -36,
+            right: -24,
+            child: _HeroBubble(size: 118, opacity: 0.12),
+          ),
+          Positioned(
+            bottom: -46,
+            left: 64,
+            child: _HeroBubble(size: 84, opacity: 0.08),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'TẤT CẢ THỜI GIAN',
+                  style: AppTextStyles.labelSmall.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.9,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Vinh danh những người chơi có tổng điểm cao nhất',
+                style: AppTextStyles.headlineSmall.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 22,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Điểm được cộng sau mỗi lượt chơi, giữ đúng tên và linh vật của người chơi.',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: Colors.white.withValues(alpha: 0.84),
+                  height: 1.35,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  _HeroStat(
+                    icon: Icons.groups_rounded,
+                    value: '$totalPlayers',
+                    label: 'người chơi',
+                  ),
+                  const SizedBox(width: 12),
+                  _HeroStat(
+                    icon: Icons.sports_esports_rounded,
+                    value: '$totalGames',
+                    label: 'lượt chơi',
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroStat extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+
+  const _HeroStat({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.secondaryContainer, size: 22),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: AppTextStyles.labelSmall.copyWith(
+                    color: Colors.white.withValues(alpha: 0.78),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyLeaderboardState extends StatelessWidget {
+  const _EmptyLeaderboardState();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      children: [
+        SizedBox(height: MediaQuery.of(context).size.height * 0.18),
+        const Icon(
+          Icons.emoji_events_outlined,
+          size: 78,
+          color: AppColors.outline,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Chưa có xếp hạng',
+          style: AppTextStyles.headlineSmall.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.primary,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Hoàn thành một ván quiz để ghi điểm đầu tiên.',
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.onSurfaceVariant,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+}
+
+class _HeroBubble extends StatelessWidget {
+  final double size;
+  final double opacity;
+
+  const _HeroBubble({required this.size, required this.opacity});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: opacity),
+        shape: BoxShape.circle,
       ),
     );
   }

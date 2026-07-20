@@ -19,10 +19,7 @@ import '../../../../features/leaderboard/application/services/i_leaderboard_serv
 class QuizPlayScreen extends StatefulWidget {
   final String roomId;
 
-  const QuizPlayScreen({
-    super.key,
-    required this.roomId,
-  });
+  const QuizPlayScreen({super.key, required this.roomId});
 
   @override
   State<QuizPlayScreen> createState() => _QuizPlayScreenState();
@@ -35,7 +32,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authVm = context.read<AuthViewModel>();
       final playerSetupVm = context.read<PlayerSetupViewModel>();
-      final userId = authVm.currentUser?.uid ?? playerSetupVm.playerId ?? 'anonymous';
+      final userId =
+          playerSetupVm.playerId ?? authVm.currentUser?.uid ?? 'anonymous';
 
       final quizVm = context.read<QuizPlayViewModel>();
       quizVm.setRoomAndUser(widget.roomId, userId);
@@ -48,7 +46,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     final quizVm = context.watch<QuizPlayViewModel>();
     final authVm = context.watch<AuthViewModel>();
     final playerSetupVm = context.watch<PlayerSetupViewModel>();
-    final userId = authVm.currentUser?.uid ?? playerSetupVm.playerId ?? 'anonymous';
+    final userId =
+        playerSetupVm.playerId ?? authVm.currentUser?.uid ?? 'anonymous';
 
     if (quizVm.isLoading) {
       return const Scaffold(
@@ -61,7 +60,10 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
               SizedBox(height: 16),
               Text(
                 'Đang tải câu hỏi...',
-                style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
@@ -78,11 +80,17 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+                const Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: AppColors.error,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Lỗi tải câu hỏi',
-                  style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
+                  style: AppTextStyles.headlineMedium.copyWith(
+                    color: AppColors.primary,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -117,7 +125,10 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
         backgroundColor: AppColors.background,
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 32.0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -144,7 +155,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Score Box
                 Container(
                   padding: const EdgeInsets.all(20),
@@ -191,7 +202,11 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                 // Live room scoreboard section
                 Row(
                   children: [
-                    const Icon(Icons.analytics_outlined, color: AppColors.primary, size: 20),
+                    const Icon(
+                      Icons.analytics_outlined,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'BẢNG XẾP HẠNG PHÒNG GAME',
@@ -207,7 +222,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                 const SizedBox(height: 12),
 
                 StreamBuilder<List<Participant>>(
-                  stream: getIt<IQuestRoomService>().watchParticipants(widget.roomId),
+                  stream: getIt<IQuestRoomService>().watchParticipants(
+                    widget.roomId,
+                  ),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return const Padding(
@@ -239,7 +256,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                       color: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(color: AppColors.primary.withValues(alpha: 0.08)),
+                        side: BorderSide(
+                          color: AppColors.primary.withValues(alpha: 0.08),
+                        ),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -255,21 +274,32 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                             final p = participants[index];
                             final isMe = p.playerId == userId;
                             final rank = index + 1;
-                            
+
                             Widget rankWidget;
                             if (rank == 1) {
-                              rankWidget = const Text('🥇', style: TextStyle(fontSize: 20));
+                              rankWidget = const Text(
+                                '🥇',
+                                style: TextStyle(fontSize: 20),
+                              );
                             } else if (rank == 2) {
-                              rankWidget = const Text('🥈', style: TextStyle(fontSize: 20));
+                              rankWidget = const Text(
+                                '🥈',
+                                style: TextStyle(fontSize: 20),
+                              );
                             } else if (rank == 3) {
-                              rankWidget = const Text('🥉', style: TextStyle(fontSize: 20));
+                              rankWidget = const Text(
+                                '🥉',
+                                style: TextStyle(fontSize: 20),
+                              );
                             } else {
                               rankWidget = Container(
                                 width: 24,
                                 height: 24,
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.05),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.05,
+                                  ),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Text(
@@ -277,7 +307,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.primary.withValues(alpha: 0.6),
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.6,
+                                    ),
                                   ),
                                 ),
                               );
@@ -287,33 +319,45 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                             final avatarBg = _getAvatarBg(p.avatarId);
 
                             return Container(
-                              color: isMe ? AppColors.primary.withValues(alpha: 0.03) : Colors.transparent,
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                              color: isMe
+                                  ? AppColors.primary.withValues(alpha: 0.03)
+                                  : Colors.transparent,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 12.0,
+                              ),
                               child: Row(
                                 children: [
                                   rankWidget,
                                   const SizedBox(width: 12),
-                                  
+
                                   CircleAvatar(
                                     radius: 16,
                                     backgroundColor: avatarBg,
-                                    child: Text(emoji, style: const TextStyle(fontSize: 16)),
+                                    child: Text(
+                                      emoji,
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
                                   ),
                                   const SizedBox(width: 12),
-                                  
+
                                   Expanded(
                                     child: Text(
                                       p.displayName + (isMe ? ' (Bạn)' : ''),
                                       style: TextStyle(
                                         fontSize: 14,
-                                        fontWeight: isMe ? FontWeight.bold : FontWeight.normal,
-                                        color: isMe ? AppColors.primary : AppColors.onSurface,
+                                        fontWeight: isMe
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                        color: isMe
+                                            ? AppColors.primary
+                                            : AppColors.onSurface,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  
+
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
@@ -322,7 +366,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                                         style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
-                                          color: isMe ? AppColors.secondary : AppColors.primary,
+                                          color: isMe
+                                              ? AppColors.secondary
+                                              : AppColors.primary,
                                         ),
                                       ),
                                       if (p.status == ParticipantStatus.playing)
@@ -330,7 +376,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                                           'Đang trả lời...',
                                           style: TextStyle(
                                             fontSize: 10,
-                                            color: AppColors.onSurfaceVariant.withValues(alpha: 0.6),
+                                            color: AppColors.onSurfaceVariant
+                                                .withValues(alpha: 0.6),
                                             fontStyle: FontStyle.italic,
                                           ),
                                         ),
@@ -346,7 +393,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                   },
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Finish Game & Back to Home Button
                 ElevatedButton.icon(
                   onPressed: () async {
@@ -354,8 +401,20 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                     final router = GoRouter.of(context);
                     if (userId.isNotEmpty && userId != 'anonymous') {
                       try {
-                        final period = _getCurrentPeriod();
-                        await getIt<ILeaderboardService>().submitGameScore(period, userId, score);
+                        final displayName =
+                            playerSetupVm.displayName ??
+                            authVm.currentUser?.displayName ??
+                            'Người chơi';
+                        final avatarUrl =
+                            playerSetupVm.avatarId ??
+                            authVm.currentUser?.avatarUrl;
+                        await getIt<ILeaderboardService>().submitGameScore(
+                          'all-time',
+                          userId,
+                          score,
+                          displayName: displayName,
+                          avatarUrl: avatarUrl,
+                        );
                       } catch (_) {}
                     }
                     router.go('/home/quests');
@@ -393,7 +452,9 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
       appBar: AppBar(
         title: Text(
           'Đấu Trường Quiz',
-          style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: AppColors.primary,
+          ),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -480,7 +541,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                       itemBuilder: (context, idx) {
                         final isSelected = quizVm.selectedAnswerIndex == idx;
                         final isCorrectOption = question.correctIndex == idx;
-                        final isEliminated = quizVm.eliminatedAnswerIndices.contains(idx);
+                        final isEliminated = quizVm.eliminatedAnswerIndices
+                            .contains(idx);
 
                         return AnswerOptionTile(
                           optionText: question.options[idx],
@@ -491,8 +553,12 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                           isEliminated: isEliminated,
                           onTap: () {
                             final authVm = context.read<AuthViewModel>();
-                            final playerSetupVm = context.read<PlayerSetupViewModel>();
-                            final userId = authVm.currentUser?.uid ?? playerSetupVm.playerId ?? 'anonymous';
+                            final playerSetupVm = context
+                                .read<PlayerSetupViewModel>();
+                            final userId =
+                                authVm.currentUser?.uid ??
+                                playerSetupVm.playerId ??
+                                'anonymous';
                             quizVm.selectAnswer(idx, widget.roomId, userId);
                           },
                         );
@@ -561,30 +627,63 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
 
   String _getEmoji(String avatarUrl) {
     switch (avatarUrl.toLowerCase()) {
-      case 'dog': return '🐶';
-      case 'cat': return '🐱';
-      case 'bird': return '🐦';
-      case 'rabbit': return '🐰';
-      case 'fox': return '🦊';
-      case 'owl': return '🦉';
-      default: return '👤';
+      case 'dog':
+        return '🐶';
+      case 'cat':
+        return '🐱';
+      case 'bird':
+        return '🐦';
+      case 'rabbit':
+        return '🐰';
+      case 'fox':
+        return '🦊';
+      case 'owl':
+        return '🦉';
+      case 'panda':
+        return '🐼';
+      case 'bear':
+        return '🐻';
+      case 'koala':
+        return '🐨';
+      case 'penguin':
+        return '🐧';
+      case 'monkey':
+        return '🐵';
+      case 'tiger':
+        return '🐯';
+      default:
+        return '👤';
     }
   }
 
   Color _getAvatarBg(String avatarUrl) {
     switch (avatarUrl.toLowerCase()) {
-      case 'dog': return const Color(0xFFFFECE0);
-      case 'cat': return const Color(0xFFE8F5E9);
-      case 'bird': return const Color(0xFFE3F2FD);
-      case 'rabbit': return const Color(0xFFF3E5F5);
-      case 'fox': return const Color(0xFFFFF3E0);
-      case 'owl': return const Color(0xFFECEFF1);
-      default: return AppColors.surfaceVariant;
+      case 'dog':
+        return const Color(0xFFFFECE0);
+      case 'cat':
+        return const Color(0xFFE8F5E9);
+      case 'bird':
+        return const Color(0xFFE3F2FD);
+      case 'rabbit':
+        return const Color(0xFFF3E5F5);
+      case 'fox':
+        return const Color(0xFFFFF3E0);
+      case 'owl':
+        return const Color(0xFFECEFF1);
+      case 'panda':
+        return const Color(0xFFF5F5F5);
+      case 'bear':
+        return const Color(0xFFFFF8E1);
+      case 'koala':
+        return const Color(0xFFE0F2F1);
+      case 'penguin':
+        return const Color(0xFFE1F5FE);
+      case 'monkey':
+        return const Color(0xFFFFF1E6);
+      case 'tiger':
+        return const Color(0xFFFFE0B2);
+      default:
+        return AppColors.surfaceVariant;
     }
-  }
-
-  String _getCurrentPeriod() {
-    final now = DateTime.now();
-    return '${now.year}-${now.month.toString().padLeft(2, '0')}';
   }
 }

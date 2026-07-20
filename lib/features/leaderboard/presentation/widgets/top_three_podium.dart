@@ -2,54 +2,12 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/entities/leaderboard_entry.dart';
+import 'leaderboard_avatar.dart';
 
 class TopThreePodium extends StatelessWidget {
   final List<LeaderboardEntry> topThree;
 
-  const TopThreePodium({
-    super.key,
-    required this.topThree,
-  });
-
-  String _getEmoji(String? avatarUrl) {
-    if (avatarUrl == null) return '👤';
-    switch (avatarUrl.toLowerCase()) {
-      case 'dog':
-        return '🐶';
-      case 'cat':
-        return '🐱';
-      case 'bird':
-        return '🐦';
-      case 'rabbit':
-        return '🐰';
-      case 'fox':
-        return '🦊';
-      case 'owl':
-        return '🦉';
-      default:
-        return '👤';
-    }
-  }
-
-  Color _getAvatarBg(String? avatarUrl) {
-    if (avatarUrl == null) return AppColors.surfaceVariant;
-    switch (avatarUrl.toLowerCase()) {
-      case 'dog':
-        return const Color(0xFFFFECE0);
-      case 'cat':
-        return const Color(0xFFE8F5E9);
-      case 'bird':
-        return const Color(0xFFE3F2FD);
-      case 'rabbit':
-        return const Color(0xFFF3E5F5);
-      case 'fox':
-        return const Color(0xFFFFF3E0);
-      case 'owl':
-        return const Color(0xFFECEFF1);
-      default:
-        return AppColors.surfaceVariant;
-    }
-  }
+  const TopThreePodium({super.key, required this.topThree});
 
   @override
   Widget build(BuildContext context) {
@@ -109,9 +67,6 @@ class TopThreePodium extends StatelessWidget {
     required Color color,
     bool hasCrown = false,
   }) {
-    final emoji = _getEmoji(entry.avatarUrl);
-    final bg = _getAvatarBg(entry.avatarUrl);
-
     return Expanded(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -122,31 +77,18 @@ class TopThreePodium extends StatelessWidget {
             clipBehavior: Clip.none,
             children: [
               // Avatar
-              Container(
-                width: hasCrown ? 64 : 52,
-                height: hasCrown ? 64 : 52,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: bg,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: color,
-                    width: 3,
-                  ),
-                ),
-                child: Text(
-                  emoji,
-                  style: TextStyle(fontSize: hasCrown ? 36 : 28),
-                ),
+              LeaderboardAvatar(
+                avatarUrl: entry.avatarUrl,
+                size: hasCrown ? 64 : 52,
+                fontSize: hasCrown ? 36 : 28,
+                borderColor: color,
+                borderWidth: 3,
               ),
               // Crown Overlay for 1st
               if (hasCrown)
                 const Positioned(
                   top: -24,
-                  child: Text(
-                    '👑',
-                    style: TextStyle(fontSize: 24),
-                  ),
+                  child: Text('👑', style: TextStyle(fontSize: 24)),
                 ),
             ],
           ),

@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/constants/system_quiz_presets.dart';
 import '../../../../core/errors/app_exception.dart';
+import '../../domain/entities/quiz_question.dart';
 import '../dtos/quiz_question_dto.dart';
 
 abstract interface class IQuizRemoteDataSource {
@@ -29,11 +31,23 @@ class QuizRemoteDataSourceImpl implements IQuizRemoteDataSource {
       final quizId = data?['quizId'] as String?;
       final topic = data?['topic'] as String? ?? '';
 
+      final systemQuiz =
+          SystemQuizPresets.findById(quizId) ??
+          SystemQuizPresets.findByTopic(topic);
+      if (systemQuiz != null) {
+        return _mapSystemQuestions(systemQuiz.questions);
+      }
+
       // 2. If room has quizId, fetch questions directly from that quiz
       if (quizId != null && quizId.isNotEmpty) {
-        final quizDoc = await _firestore.collection('quizzes').doc(quizId).get();
+        final quizDoc = await _firestore
+            .collection('quizzes')
+            .doc(quizId)
+            .get();
         if (quizDoc.exists) {
-          final questionsSnapshot = await quizDoc.reference.collection('questions').get();
+          final questionsSnapshot = await quizDoc.reference
+              .collection('questions')
+              .get();
           if (questionsSnapshot.docs.isNotEmpty) {
             return questionsSnapshot.docs
                 .map((doc) => QuizQuestionDto.fromFirestore(doc.data(), doc.id))
@@ -52,7 +66,9 @@ class QuizRemoteDataSourceImpl implements IQuizRemoteDataSource {
       if (quizQuery.docs.isNotEmpty) {
         final quizDoc = quizQuery.docs.first;
         // Check if questions are inside quizDoc or in subcollection
-        final questionsSnapshot = await quizDoc.reference.collection('questions').get();
+        final questionsSnapshot = await quizDoc.reference
+            .collection('questions')
+            .get();
         if (questionsSnapshot.docs.isNotEmpty) {
           return questionsSnapshot.docs
               .map((doc) => QuizQuestionDto.fromFirestore(doc.data(), doc.id))
@@ -81,7 +97,12 @@ class QuizRemoteDataSourceImpl implements IQuizRemoteDataSource {
         const QuizQuestionDto(
           id: 'q3',
           text: 'Who painted the Mona Lisa?',
-          options: ['Vincent van Gogh', 'Pablo Picasso', 'Leonardo da Vinci', 'Michelangelo'],
+          options: [
+            'Vincent van Gogh',
+            'Pablo Picasso',
+            'Leonardo da Vinci',
+            'Michelangelo',
+          ],
           correctIndex: 2,
           timeLimit: 20,
           hintText: 'He was an Italian Renaissance polymath.',
@@ -89,14 +110,22 @@ class QuizRemoteDataSourceImpl implements IQuizRemoteDataSource {
         const QuizQuestionDto(
           id: 'q4',
           text: 'What is the largest ocean on Earth?',
-          options: ['Atlantic Ocean', 'Indian Ocean', 'Arctic Ocean', 'Pacific Ocean'],
+          options: [
+            'Atlantic Ocean',
+            'Indian Ocean',
+            'Arctic Ocean',
+            'Pacific Ocean',
+          ],
           correctIndex: 3,
           timeLimit: 20,
           hintText: 'It covers more area than all the land on Earth combined.',
         ),
       ];
     } on FirebaseException catch (e) {
-      throw AppException(e.message ?? 'Failed to load quiz questions.', code: e.code);
+      throw AppException(
+        e.message ?? 'Failed to load quiz questions.',
+        code: e.code,
+      );
     } catch (e) {
       throw AppException(e.toString());
     }
@@ -119,7 +148,10 @@ class QuizRemoteDataSourceImpl implements IQuizRemoteDataSource {
           .doc(questionId)
           .set(answerData);
     } on FirebaseException catch (e) {
-      throw AppException(e.message ?? 'Failed to submit player answer.', code: e.code);
+      throw AppException(
+        e.message ?? 'Failed to submit player answer.',
+        code: e.code,
+      );
     } catch (e) {
       throw AppException(e.toString());
     }
@@ -133,13 +165,30 @@ class QuizRemoteDataSourceImpl implements IQuizRemoteDataSource {
           .doc(roomId)
           .collection('participants')
           .doc(userId)
-          .update({
-        'score': totalScore,
-      });
+          .update({'score': totalScore});
     } on FirebaseException catch (e) {
-      throw AppException(e.message ?? 'Failed to update player score.', code: e.code);
+      throw AppException(
+        e.message ?? 'Failed to update player score.',
+        code: e.code,
+      );
     } catch (e) {
       throw AppException(e.toString());
     }
+  }
+
+  List<QuizQuestionDto> _mapSystemQuestions(List<QuizQuestion> questions) {
+    return questions
+        .map(
+          (question) => QuizQuestionDto(
+            id: question.id,
+            text: question.text,
+            options: question.options,
+            correctIndex: question.correctIndex,
+            imageUrl: question.imageUrl,
+            timeLimit: question.timeLimit,
+            hintText: question.hintText,
+          ),
+        )
+        .toList();
   }
 }

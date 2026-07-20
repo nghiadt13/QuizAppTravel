@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -381,7 +381,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                'Tạo & Quản Lý Trò Chơi',
+                                'Đăng Nhập & Cùng Chơi',
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                       color: colors.primary,
@@ -390,7 +390,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Đăng nhập Google để tạo phòng game, tùy chỉnh câu hỏi và theo dõi bảng xếp hạng trực tiếp.',
+                                'Đăng nhập bằng Google để tham gia trò chơi, tự tạo bộ câu hỏi và mời bạn bè cùng chơi.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: colors.onSurfaceVariant.withValues(alpha: 0.8),
@@ -664,3 +664,4 @@ class BubblePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
+

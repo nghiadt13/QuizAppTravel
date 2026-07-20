@@ -15,6 +15,97 @@ class AvatarPicker extends StatelessWidget {
     required this.onSelect,
   });
 
+  @override
+  Widget build(BuildContext context) {
+    if (avatars.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final crossAxisCount = width < 360
+            ? 2
+            : width < 620
+            ? 3
+            : width < 860
+            ? 4
+            : 6;
+        final tileHeight = width < 360
+            ? 136.0
+            : width < 620
+            ? 146.0
+            : 154.0;
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            mainAxisExtent: tileHeight,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+          ),
+          itemCount: avatars.length,
+          itemBuilder: (context, index) {
+            final avatar = avatars[index];
+            return _AnimatedAvatarTile(
+              avatar: avatar,
+              index: index,
+              isSelected: avatar.id == selectedAvatarId,
+              onTap: () => onSelect(avatar.id),
+              compact: width < 420,
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _AnimatedAvatarTile extends StatefulWidget {
+  final PresetAvatar avatar;
+  final int index;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final bool compact;
+
+  const _AnimatedAvatarTile({
+    required this.avatar,
+    required this.index,
+    required this.isSelected,
+    required this.onTap,
+    required this.compact,
+  });
+
+  @override
+  State<_AnimatedAvatarTile> createState() => _AnimatedAvatarTileState();
+}
+
+class _AnimatedAvatarTileState extends State<_AnimatedAvatarTile>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _floatAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1200 + (widget.index % 4) * 180),
+    )..repeat(reverse: true);
+    _floatAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   String _getEmoji(String id) {
     switch (id.toLowerCase()) {
       case 'dog':
@@ -29,8 +120,20 @@ class AvatarPicker extends StatelessWidget {
         return '🦊';
       case 'owl':
         return '🦉';
+      case 'panda':
+        return '🐼';
+      case 'bear':
+        return '🐻';
+      case 'koala':
+        return '🐨';
+      case 'penguin':
+        return '🐧';
+      case 'monkey':
+        return '🐵';
+      case 'tiger':
+        return '🐯';
       default:
-        return '👤';
+        return '🙂';
     }
   }
 
@@ -48,6 +151,18 @@ class AvatarPicker extends StatelessWidget {
         return const Color(0xFFFFF3E0);
       case 'owl':
         return const Color(0xFFECEFF1);
+      case 'panda':
+        return const Color(0xFFF5F5F5);
+      case 'bear':
+        return const Color(0xFFFFF8E1);
+      case 'koala':
+        return const Color(0xFFE0F2F1);
+      case 'penguin':
+        return const Color(0xFFE1F5FE);
+      case 'monkey':
+        return const Color(0xFFFFF1E6);
+      case 'tiger':
+        return const Color(0xFFFFE0B2);
       default:
         return AppColors.surfaceVariant;
     }
@@ -55,95 +170,96 @@ class AvatarPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (avatars.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final emoji = _getEmoji(widget.avatar.id);
+    final bg = _getBackgroundColor(widget.avatar.id);
+    final avatarSize = widget.compact ? 64.0 : 74.0;
+    final emojiSize = widget.compact ? 38.0 : 44.0;
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 1,
-      ),
-      itemCount: avatars.length,
-      itemBuilder: (context, index) {
-        final avatar = avatars[index];
-        final isSelected = avatar.id == selectedAvatarId;
-        final emoji = _getEmoji(avatar.id);
-        final bg = _getBackgroundColor(avatar.id);
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: AnimatedBuilder(
+        animation: _floatAnimation,
+        builder: (context, child) {
+          final floatValue = _floatAnimation.value;
+          final yOffset = widget.isSelected ? -4.0 : -2.5 * floatValue;
+          final scale = widget.isSelected ? 1.06 : 1.0 + (0.025 * floatValue);
 
-        return GestureDetector(
-          onTap: () => onSelect(avatar.id),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              color: bg,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isSelected ? AppColors.coralOrange : Colors.transparent,
-                width: 3.5,
-              ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: AppColors.coralOrange.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+          return Transform.translate(
+            offset: Offset(0, yOffset),
+            child: Transform.scale(scale: scale, child: child),
+          );
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: widget.isSelected ? AppColors.coralOrange : Colors.white,
+              width: widget.isSelected ? 3 : 1.5,
             ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+            boxShadow: [
+              BoxShadow(
+                color: widget.isSelected
+                    ? AppColors.coralOrange.withValues(alpha: 0.28)
+                    : Colors.black.withValues(alpha: 0.06),
+                blurRadius: widget.isSelected ? 16 : 8,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      emoji,
-                      style: const TextStyle(fontSize: 36),
+                    Container(
+                      width: avatarSize,
+                      height: avatarSize,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.72),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(emoji, style: TextStyle(fontSize: emojiSize)),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: widget.compact ? 8 : 10),
                     Text(
-                      avatar.label,
+                      widget.avatar.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.labelSmall.copyWith(
                         color: AppColors.onSurfaceVariant,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
                 ),
-                if (isSelected)
-                  Positioned(
-                    top: 4,
-                    right: 4,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(
-                        color: AppColors.coralOrange,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check,
-                        color: Colors.white,
-                        size: 14,
-                      ),
+              ),
+              if (widget.isSelected)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: AppColors.coralOrange,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 15,
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

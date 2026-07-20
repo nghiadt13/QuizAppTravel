@@ -14,7 +14,11 @@ class LeaderboardServiceImpl implements ILeaderboardService {
     int limit = 20,
     String? lastUserId,
   }) async {
-    return _repository.fetchLeaderboard(period, limit: limit, lastUserId: lastUserId);
+    return _repository.fetchLeaderboard(
+      period,
+      limit: limit,
+      lastUserId: lastUserId,
+    );
   }
 
   @override
@@ -28,7 +32,19 @@ class LeaderboardServiceImpl implements ILeaderboardService {
   }
 
   @override
-  Future<void> submitGameScore(String period, String userId, int score) async {
-    await _repository.updateScore(period, userId, score);
+  Future<void> submitGameScore(
+    String period,
+    String userId,
+    int score, {
+    required String displayName,
+    String? avatarUrl,
+  }) async {
+    await _repository.updateScore(
+      period,
+      userId,
+      score,
+      displayName: displayName,
+      avatarUrl: avatarUrl,
+    );
   }
 }

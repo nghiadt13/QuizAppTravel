@@ -15,7 +15,7 @@ class LeaderboardViewModel extends ChangeNotifier {
   LeaderboardEntry? _userRank;
   LeaderboardEntry? get userRank => _userRank;
 
-  String _period = '2026-07'; // current active month period
+  String _period = 'all-time';
   String get period => _period;
 
   bool _isLoading = false;

@@ -7,28 +7,36 @@ class PlayerAvatarGrid extends StatelessWidget {
   final List<Participant> participants;
   final String? hostId;
 
-  const PlayerAvatarGrid({
-    super.key,
-    required this.participants,
-    this.hostId,
-  });
+  const PlayerAvatarGrid({super.key, required this.participants, this.hostId});
 
-  IconData _getAvatarIcon(String avatarId) {
+  String _getAvatarEmoji(String avatarId) {
     switch (avatarId.toLowerCase()) {
       case 'dog':
-        return Icons.pets;
+        return '🐶';
       case 'cat':
-        return Icons.pets;
+        return '🐱';
       case 'bird':
-        return Icons.flutter_dash;
+        return '🐦';
       case 'rabbit':
-        return Icons.cruelty_free;
+        return '🐰';
       case 'fox':
-        return Icons.set_meal;
+        return '🦊';
       case 'owl':
-        return Icons.pest_control;
+        return '🦉';
+      case 'panda':
+        return '🐼';
+      case 'bear':
+        return '🐻';
+      case 'koala':
+        return '🐨';
+      case 'penguin':
+        return '🐧';
+      case 'monkey':
+        return '🐵';
+      case 'tiger':
+        return '🐯';
       default:
-        return Icons.person;
+        return '🙂';
     }
   }
 
@@ -70,6 +78,42 @@ class PlayerAvatarGrid extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         );
+      case 'panda':
+        return const LinearGradient(
+          colors: [Color(0xFFB0BEC5), Color(0xFF455A64)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
+      case 'bear':
+        return const LinearGradient(
+          colors: [Color(0xFFD7CCC8), Color(0xFF8D6E63)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
+      case 'koala':
+        return const LinearGradient(
+          colors: [Color(0xFFA5D6A7), Color(0xFF26A69A)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
+      case 'penguin':
+        return const LinearGradient(
+          colors: [Color(0xFF81D4FA), Color(0xFF0288D1)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
+      case 'monkey':
+        return const LinearGradient(
+          colors: [Color(0xFFFFCC80), Color(0xFFEF6C00)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
+      case 'tiger':
+        return const LinearGradient(
+          colors: [Color(0xFFFFB74D), Color(0xFFE65100)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
       default:
         return LinearGradient(
           colors: [AppColors.primaryContainer, AppColors.primary],
@@ -98,13 +142,13 @@ class PlayerAvatarGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         final participant = participants[index];
         final isHost = participant.playerId == hostId;
-        final icon = _getAvatarIcon(participant.avatarId);
+        final emoji = _getAvatarEmoji(participant.avatarId);
         final gradient = _getAvatarGradient(participant.avatarId);
 
         return _PlayerCard(
           participant: participant,
           isHost: isHost,
-          icon: icon,
+          emoji: emoji,
           gradient: gradient,
         );
       },
@@ -143,7 +187,9 @@ class PlayerAvatarGrid extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AppColors.primaryContainer.withValues(alpha: 0.3),
+                        color: AppColors.primaryContainer.withValues(
+                          alpha: 0.3,
+                        ),
                         width: 2,
                       ),
                     ),
@@ -225,13 +271,13 @@ class PlayerAvatarGrid extends StatelessWidget {
 class _PlayerCard extends StatelessWidget {
   final Participant participant;
   final bool isHost;
-  final IconData icon;
+  final String emoji;
   final LinearGradient gradient;
 
   const _PlayerCard({
     required this.participant,
     required this.isHost,
-    required this.icon,
+    required this.emoji,
     required this.gradient,
   });
 
@@ -245,17 +291,12 @@ class _PlayerCard extends StatelessWidget {
         shadowColor: isHost
             ? AppColors.secondaryContainer.withValues(alpha: 0.3)
             : AppColors.primary.withValues(alpha: 0.15),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: isHost
-                ? Border.all(
-                    color: AppColors.secondaryContainer,
-                    width: 2,
-                  )
+                ? Border.all(color: AppColors.secondaryContainer, width: 2)
                 : null,
           ),
           child: Stack(
@@ -287,10 +328,11 @@ class _PlayerCard extends StatelessWidget {
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
-                          icon,
-                          size: 28,
-                          color: gradient.colors.last,
+                        child: Center(
+                          child: Text(
+                            emoji,
+                            style: const TextStyle(fontSize: 32),
+                          ),
                         ),
                       ),
                     ),
@@ -342,10 +384,7 @@ class _PlayerCard extends StatelessWidget {
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFFFFD54F),
-                          Color(0xFFFFB300),
-                        ],
+                        colors: [Color(0xFFFFD54F), Color(0xFFFFB300)],
                       ),
                       shape: BoxShape.circle,
                       boxShadow: [

@@ -16,7 +16,8 @@ class QuestsTabScreen extends StatefulWidget {
   State<QuestsTabScreen> createState() => _QuestsTabScreenState();
 }
 
-class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderStateMixin {
+class _QuestsTabScreenState extends State<QuestsTabScreen>
+    with TickerProviderStateMixin {
   late final AnimationController _floatController;
   late final Animation<double> _float1;
   late final Animation<double> _float2;
@@ -69,7 +70,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
   @override
   void initState() {
     super.initState();
-    
+
     // Bobbing float animation for background icons
     _floatController = AnimationController(
       vsync: this,
@@ -97,7 +98,9 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authVm = context.read<AuthViewModel>();
       if (authVm.currentUser != null) {
-        context.read<QuizManagerViewModel>().fetchMyQuizzes(authVm.currentUser!.uid);
+        context.read<QuizManagerViewModel>().fetchMyQuizzes(
+          authVm.currentUser!.uid,
+        );
       }
       context.read<QuizManagerViewModel>().fetchPublicQuizzes();
     });
@@ -117,7 +120,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
 
     final authVm = context.read<AuthViewModel>();
     final user = authVm.currentUser;
-    
+
     String displayName = 'Bạn học mẫn cán';
     String avatarId = 'fox';
     String playerId;
@@ -162,7 +165,10 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
           setState(() => _isActionLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(joinVm.errorMessage ?? 'Mã PIN không đúng hoặc phòng đã bắt đầu chơi.'),
+              content: Text(
+                joinVm.errorMessage ??
+                    'Mã PIN không đúng hoặc phòng đã bắt đầu chơi.',
+              ),
               backgroundColor: colors.error,
             ),
           );
@@ -176,11 +182,15 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
     }
   }
 
-  Future<void> _startPracticeRoomWithQuiz(QuizSet quiz, ColorScheme colors) async {
+  Future<void> _startPracticeRoomWithQuiz(
+    QuizSet quiz,
+    ColorScheme colors,
+  ) async {
     final authVm = context.read<AuthViewModel>();
     final user = authVm.currentUser;
-    
-    final hostId = user?.uid ?? 'guest_${DateTime.now().millisecondsSinceEpoch}';
+
+    final hostId =
+        user?.uid ?? 'guest_${DateTime.now().millisecondsSinceEpoch}';
 
     setState(() => _isActionLoading = true);
 
@@ -189,7 +199,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
       createVm.selectQuiz(quiz.id, quiz.title);
       createVm.toggleIsPublic(true);
       final room = await createVm.createRoom(hostId);
-      
+
       if (mounted) {
         if (room != null) {
           context.go('/lobby/${room.id}');
@@ -197,7 +207,9 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
           setState(() => _isActionLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(createVm.errorMessage ?? 'Không thể tạo phòng luyện tập.'),
+              content: Text(
+                createVm.errorMessage ?? 'Không thể tạo phòng luyện tập.',
+              ),
               backgroundColor: colors.error,
             ),
           );
@@ -219,8 +231,9 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
   Future<void> _startPracticeRoom(String topic, ColorScheme colors) async {
     final authVm = context.read<AuthViewModel>();
     final user = authVm.currentUser;
-    
-    final hostId = user?.uid ?? 'guest_${DateTime.now().millisecondsSinceEpoch}';
+
+    final hostId =
+        user?.uid ?? 'guest_${DateTime.now().millisecondsSinceEpoch}';
 
     setState(() => _isActionLoading = true);
 
@@ -229,7 +242,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
       createVm.setTopic(topic);
       createVm.toggleIsPublic(true);
       final room = await createVm.createRoom(hostId);
-      
+
       if (mounted) {
         if (room != null) {
           context.go('/lobby/${room.id}');
@@ -237,7 +250,9 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
           setState(() => _isActionLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(createVm.errorMessage ?? 'Không thể tạo phòng luyện tập.'),
+              content: Text(
+                createVm.errorMessage ?? 'Không thể tạo phòng luyện tập.',
+              ),
               backgroundColor: colors.error,
             ),
           );
@@ -260,8 +275,9 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
     final quizVm = context.read<QuizManagerViewModel>();
     if (quizVm.publicQuizzes.isNotEmpty) {
       final random = Random();
-      final selected = quizVm.publicQuizzes[random.nextInt(quizVm.publicQuizzes.length)];
-      
+      final selected =
+          quizVm.publicQuizzes[random.nextInt(quizVm.publicQuizzes.length)];
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('🎲 Chọn ngẫu nhiên: ${selected.title}!'),
@@ -269,12 +285,12 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
           duration: const Duration(seconds: 1),
         ),
       );
-      
+
       _startPracticeRoomWithQuiz(selected, colors);
     } else {
       final random = Random();
       final selected = _topics[random.nextInt(_topics.length)];
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('🎲 Chọn ngẫu nhiên: ${selected['title']}!'),
@@ -282,7 +298,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
           duration: const Duration(seconds: 1),
         ),
       );
-      
+
       _startPracticeRoom(selected['dbTopic'], colors);
     }
   }
@@ -339,7 +355,9 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.normal,
-                        color: AppColors.onSurfaceVariant.withValues(alpha: 0.6),
+                        color: AppColors.onSurfaceVariant.withValues(
+                          alpha: 0.6,
+                        ),
                       ),
                     ),
                     Row(
@@ -380,7 +398,9 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
             ),
             child: IconButton(
               icon: Icon(
-                _isDarkPlaceholder ? Icons.wb_sunny_outlined : Icons.dark_mode_outlined,
+                _isDarkPlaceholder
+                    ? Icons.wb_sunny_outlined
+                    : Icons.dark_mode_outlined,
                 size: 20,
               ),
               color: AppColors.primary,
@@ -443,9 +463,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
           ),
 
           // Background Bubbles Effect
-          const Positioned.fill(
-            child: AnimatedBubbles(),
-          ),
+          const Positioned.fill(child: AnimatedBubbles()),
 
           // Floating Background Icons
           AnimatedBuilder(
@@ -555,27 +573,49 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                 ),
                               ),
                               const SizedBox(height: 24),
-                              
+
                               // Nickname input field ONLY for guest (not logged in)
                               if (user == null) ...[
                                 TextField(
                                   controller: _nicknameController,
-                                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
                                   decoration: InputDecoration(
                                     labelText: 'Biệt danh của bạn',
-                                    labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                                    labelStyle: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.6,
+                                      ),
+                                    ),
                                     hintText: 'Nhập biệt danh để tham gia...',
-                                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
-                                    prefixIcon: const Icon(Icons.person_outline, color: Colors.white70),
+                                    hintStyle: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.4,
+                                      ),
+                                    ),
+                                    prefixIcon: const Icon(
+                                      Icons.person_outline,
+                                      color: Colors.white70,
+                                    ),
                                     filled: true,
-                                    fillColor: Colors.white.withValues(alpha: 0.08),
+                                    fillColor: Colors.white.withValues(
+                                      alpha: 0.08,
+                                    ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
+                                      borderSide: BorderSide(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                      ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: AppColors.secondaryContainer),
+                                      borderSide: const BorderSide(
+                                        color: AppColors.secondaryContainer,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -584,12 +624,17 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
 
                               // 6 PIN inputs row
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: List.generate(6, (index) {
                                   final text = _pinController.text;
-                                  final char = text.length > index ? text[index] : '';
-                                  final isFocused = _pinFocusNode.hasFocus && text.length == index;
-                                  
+                                  final char = text.length > index
+                                      ? text[index]
+                                      : '';
+                                  final isFocused =
+                                      _pinFocusNode.hasFocus &&
+                                      text.length == index;
+
                                   return GestureDetector(
                                     onTap: () {
                                       _pinFocusNode.requestFocus();
@@ -599,12 +644,17 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                       height: 48,
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withValues(alpha: 0.1),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.1,
+                                        ),
                                         borderRadius: BorderRadius.circular(10),
                                         border: Border.all(
                                           color: isFocused
-                                              ? AppColors.secondaryContainer // Sunny Yellow
-                                              : Colors.white.withValues(alpha: 0.2),
+                                              ? AppColors
+                                                    .secondaryContainer // Sunny Yellow
+                                              : Colors.white.withValues(
+                                                  alpha: 0.2,
+                                                ),
                                           width: isFocused ? 2 : 1,
                                         ),
                                       ),
@@ -620,7 +670,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                   );
                                 }),
                               ),
-                              
+
                               // Bulletproof Hidden Input (6 digits)
                               SizedBox(
                                 width: 0.1,
@@ -631,7 +681,9 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                   keyboardType: TextInputType.number,
                                   maxLength: 6,
                                   showCursor: false,
-                                  style: const TextStyle(color: Colors.transparent),
+                                  style: const TextStyle(
+                                    color: Colors.transparent,
+                                  ),
                                   decoration: const InputDecoration(
                                     border: InputBorder.none,
                                     counterText: '',
@@ -639,14 +691,19 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                 ),
                               ),
                               const SizedBox(height: 24),
-                              
+
                               // Enter button (Vibrant Sunny Yellow)
                               ElevatedButton(
-                                onPressed: () => _joinGameRoom(_pinController.text, colors),
+                                onPressed: () =>
+                                    _joinGameRoom(_pinController.text, colors),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.secondaryContainer, // Sunny Yellow
-                                  foregroundColor: AppColors.onSecondaryContainer,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  backgroundColor: AppColors
+                                      .secondaryContainer, // Sunny Yellow
+                                  foregroundColor:
+                                      AppColors.onSecondaryContainer,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                   elevation: 2,
                                   shadowColor: Colors.black26,
                                   shape: RoundedRectangleBorder(
@@ -667,29 +724,6 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                       ),
                                     ),
                                   ],
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              
-                              // Footer suggestion (6 digits)
-                              Center(
-                                child: Text.rich(
-                                  TextSpan(
-                                    text: 'Gợi ý chơi thử: Gõ mã PIN ',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.white.withValues(alpha: 0.6),
-                                    ),
-                                    children: const [
-                                      TextSpan(
-                                        text: '777777',
-                                        style: TextStyle(
-                                          color: AppColors.secondaryContainer,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
                                 ),
                               ),
                             ],
@@ -720,7 +754,9 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                     'Chọn ngẫu nhiên 🎲',
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: colors.primary.withValues(alpha: 0.8),
+                                      color: colors.primary.withValues(
+                                        alpha: 0.8,
+                                      ),
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -730,7 +766,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                           ],
                         ),
                         const SizedBox(height: 16),
-                        
+
                         // Practice Topics Grid (Real Public Quizzes from Firestore or Fallback)
                         if (quizVm.isLoading && quizVm.publicQuizzes.isEmpty)
                           const Center(
@@ -741,12 +777,13 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                           )
                         else if (quizVm.publicQuizzes.isNotEmpty)
                           GridView.builder(
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                              childAspectRatio: 0.95,
-                            ),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 16,
+                                  mainAxisSpacing: 16,
+                                  childAspectRatio: 0.95,
+                                ),
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: quizVm.publicQuizzes.length,
@@ -763,7 +800,9 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
                             childAspectRatio: 0.95,
-                            children: _topics.map((topic) => _buildTopicCard(topic, colors)).toList(),
+                            children: _topics
+                                .map((topic) => _buildTopicCard(topic, colors))
+                                .toList(),
                           ),
                         const SizedBox(height: 32),
 
@@ -804,7 +843,9 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                   Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: colors.primary.withValues(alpha: 0.08),
+                                      color: colors.primary.withValues(
+                                        alpha: 0.08,
+                                      ),
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(
@@ -828,7 +869,9 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                               Text(
                                 'Tự tổ chức phòng thi đấu riêng, chọn chủ đề yêu thích và chia sẻ mã PIN để mời bạn bè cùng tham gia tranh tài.',
                                 style: TextStyle(
-                                  color: AppColors.onSurfaceVariant.withValues(alpha: 0.8),
+                                  color: AppColors.onSurfaceVariant.withValues(
+                                    alpha: 0.8,
+                                  ),
                                   fontSize: 13,
                                   height: 1.4,
                                 ),
@@ -844,7 +887,9 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: colors.primary,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                   elevation: 1,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
@@ -872,7 +917,10 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: colors.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(10),
@@ -889,7 +937,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                           ],
                         ),
                         const SizedBox(height: 12),
-                        
+
                         // Banner Card for Creating Quiz
                         Container(
                           padding: const EdgeInsets.all(20),
@@ -919,7 +967,8 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                   Container(
                                     padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
-                                      color: AppColors.secondaryContainer.withValues(alpha: 0.2),
+                                      color: AppColors.secondaryContainer
+                                          .withValues(alpha: 0.2),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
@@ -931,7 +980,8 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                   const SizedBox(width: 12),
                                   const Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           'Tự tạo Bộ Quiz của riêng bạn',
@@ -967,11 +1017,18 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                 onPressed: () {
                                   final authVm = context.read<AuthViewModel>();
                                   final user = authVm.currentUser;
-                                  final userId = user?.uid ?? 'guest_${DateTime.now().millisecondsSinceEpoch}';
-                                  context.read<QuizManagerViewModel>().startNewQuiz(userId);
+                                  final userId =
+                                      user?.uid ??
+                                      'guest_${DateTime.now().millisecondsSinceEpoch}';
+                                  context
+                                      .read<QuizManagerViewModel>()
+                                      .startNewQuiz(userId);
                                   context.push('/create-quiz');
                                 },
-                                icon: const Icon(Icons.add_circle_outline, size: 20),
+                                icon: const Icon(
+                                  Icons.add_circle_outline,
+                                  size: 20,
+                                ),
                                 label: const Text(
                                   'TẠO BỘ CÂU HỎI MỚI',
                                   style: TextStyle(
@@ -982,8 +1039,11 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                 ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.secondaryContainer,
-                                  foregroundColor: AppColors.onSecondaryContainer,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  foregroundColor:
+                                      AppColors.onSecondaryContainer,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                   elevation: 2,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
@@ -1031,25 +1091,37 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                               itemBuilder: (context, index) {
                                 final quiz = quizVm.myQuizzes[index];
                                 return GestureDetector(
-                                  onTap: () => context.push('/quiz-detail', extra: quiz),
+                                  onTap: () =>
+                                      context.push('/quiz-detail', extra: quiz),
                                   child: Container(
                                     width: 200,
                                     margin: const EdgeInsets.only(right: 14),
                                     padding: const EdgeInsets.all(14),
                                     decoration: BoxDecoration(
-                                      image: quiz.imageUrl != null && quiz.imageUrl!.isNotEmpty
+                                      image:
+                                          quiz.imageUrl != null &&
+                                              quiz.imageUrl!.isNotEmpty
                                           ? DecorationImage(
-                                              image: NetworkImage(quiz.imageUrl!),
+                                              image: NetworkImage(
+                                                quiz.imageUrl!,
+                                              ),
                                               fit: BoxFit.cover,
                                               colorFilter: ColorFilter.mode(
-                                                Colors.black.withValues(alpha: 0.45),
+                                                Colors.black.withValues(
+                                                  alpha: 0.45,
+                                                ),
                                                 BlendMode.darken,
                                               ),
                                             )
                                           : null,
-                                      gradient: quiz.imageUrl == null || quiz.imageUrl!.isEmpty
+                                      gradient:
+                                          quiz.imageUrl == null ||
+                                              quiz.imageUrl!.isEmpty
                                           ? const LinearGradient(
-                                              colors: [Color(0xFF0D9488), Color(0xFF115E59)],
+                                              colors: [
+                                                Color(0xFF0D9488),
+                                                Color(0xFF115E59),
+                                              ],
                                               begin: Alignment.topLeft,
                                               end: Alignment.bottomRight,
                                             )
@@ -1057,23 +1129,32 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                       borderRadius: BorderRadius.circular(16),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.08),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.08,
+                                          ),
                                           blurRadius: 8,
                                           offset: const Offset(0, 3),
                                         ),
                                       ],
                                     ),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Row(
                                           children: [
                                             Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 2,
+                                                  ),
                                               decoration: BoxDecoration(
                                                 color: Colors.white24,
-                                                borderRadius: BorderRadius.circular(8),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
                                               ),
                                               child: Text(
                                                 '${quiz.questions.length} câu',
@@ -1087,7 +1168,8 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                                           ],
                                         ),
                                         Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               quiz.title,
@@ -1131,7 +1213,10 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                         SizedBox(height: 16),
                         Text(
                           'Đang khởi tạo phòng game...',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
                         ),
                       ],
                     ),
@@ -1188,11 +1273,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                     color: Colors.white.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    topic['icon'],
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  child: Icon(topic['icon'], color: Colors.white, size: 20),
                 ),
                 Flexible(
                   child: Column(
@@ -1289,11 +1370,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
                     color: Colors.white.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    style['icon'],
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  child: Icon(style['icon'], color: Colors.white, size: 20),
                 ),
                 Flexible(
                   child: Column(
@@ -1339,7 +1416,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
         child: Icon(Icons.person, color: colors.primary, size: 20),
       );
     }
-    
+
     if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) {
       return CircleAvatar(
         radius: 20,
@@ -1347,40 +1424,75 @@ class _QuestsTabScreenState extends State<QuestsTabScreen> with TickerProviderSt
         backgroundImage: NetworkImage(avatarUrl),
       );
     }
-    
+
     final emoji = _getEmoji(avatarUrl);
     final bg = _getAvatarBg(avatarUrl);
     return CircleAvatar(
       radius: 20,
       backgroundColor: bg,
-      child: Text(
-        emoji,
-        style: const TextStyle(fontSize: 20),
-      ),
+      child: Text(emoji, style: const TextStyle(fontSize: 20)),
     );
   }
 
   String _getEmoji(String avatarUrl) {
     switch (avatarUrl.toLowerCase()) {
-      case 'dog': return '🐶';
-      case 'cat': return '🐱';
-      case 'bird': return '🐦';
-      case 'rabbit': return '🐰';
-      case 'fox': return '🦊';
-      case 'owl': return '🦉';
-      default: return '👤';
+      case 'dog':
+        return '🐶';
+      case 'cat':
+        return '🐱';
+      case 'bird':
+        return '🐦';
+      case 'rabbit':
+        return '🐰';
+      case 'fox':
+        return '🦊';
+      case 'owl':
+        return '🦉';
+      case 'panda':
+        return '🐼';
+      case 'bear':
+        return '🐻';
+      case 'koala':
+        return '🐨';
+      case 'penguin':
+        return '🐧';
+      case 'monkey':
+        return '🐵';
+      case 'tiger':
+        return '🐯';
+      default:
+        return '👤';
     }
   }
 
   Color _getAvatarBg(String avatarUrl) {
     switch (avatarUrl.toLowerCase()) {
-      case 'dog': return const Color(0xFFFFECE0);
-      case 'cat': return const Color(0xFFE8F5E9);
-      case 'bird': return const Color(0xFFE3F2FD);
-      case 'rabbit': return const Color(0xFFF3E5F5);
-      case 'fox': return const Color(0xFFFFF3E0);
-      case 'owl': return const Color(0xFFECEFF1);
-      default: return AppColors.outlineVariant;
+      case 'dog':
+        return const Color(0xFFFFECE0);
+      case 'cat':
+        return const Color(0xFFE8F5E9);
+      case 'bird':
+        return const Color(0xFFE3F2FD);
+      case 'rabbit':
+        return const Color(0xFFF3E5F5);
+      case 'fox':
+        return const Color(0xFFFFF3E0);
+      case 'owl':
+        return const Color(0xFFECEFF1);
+      case 'panda':
+        return const Color(0xFFF5F5F5);
+      case 'bear':
+        return const Color(0xFFFFF8E1);
+      case 'koala':
+        return const Color(0xFFE0F2F1);
+      case 'penguin':
+        return const Color(0xFFE1F5FE);
+      case 'monkey':
+        return const Color(0xFFFFF1E6);
+      case 'tiger':
+        return const Color(0xFFFFE0B2);
+      default:
+        return AppColors.outlineVariant;
     }
   }
 }
@@ -1392,7 +1504,8 @@ class AnimatedBubbles extends StatefulWidget {
   State<AnimatedBubbles> createState() => _AnimatedBubblesState();
 }
 
-class _AnimatedBubblesState extends State<AnimatedBubbles> with SingleTickerProviderStateMixin {
+class _AnimatedBubblesState extends State<AnimatedBubbles>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   final List<Bubble> _bubbles = [];
   final Random _random = Random();
@@ -1402,22 +1515,23 @@ class _AnimatedBubblesState extends State<AnimatedBubbles> with SingleTickerProv
     super.initState();
     // Initialize 15 bubbles with random values (slightly fewer for subtlety)
     for (int i = 0; i < 15; i++) {
-      _bubbles.add(Bubble(
-        x: _random.nextDouble(),
-        y: _random.nextDouble() * 1.2, // Spread out vertically
-        size: _random.nextDouble() * 7 + 3, // size 3 to 10
-        speed: _random.nextDouble() * 0.0006 + 0.0003, // Slower float speed
-        opacity: _random.nextDouble() * 0.08 + 0.03, // Translucent opacity
-        swaySpeed: _random.nextDouble() * 0.8 + 0.4, // Slower swaying motion
-        swayWidth: _random.nextDouble() * 8 + 2, // Gentler swaying width
-      ));
+      _bubbles.add(
+        Bubble(
+          x: _random.nextDouble(),
+          y: _random.nextDouble() * 1.2, // Spread out vertically
+          size: _random.nextDouble() * 7 + 3, // size 3 to 10
+          speed: _random.nextDouble() * 0.0006 + 0.0003, // Slower float speed
+          opacity: _random.nextDouble() * 0.08 + 0.03, // Translucent opacity
+          swaySpeed: _random.nextDouble() * 0.8 + 0.4, // Slower swaying motion
+          swayWidth: _random.nextDouble() * 8 + 2, // Gentler swaying width
+        ),
+      );
     }
 
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10),
-    )..addListener(_updateBubbles)
-     ..repeat();
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 10))
+          ..addListener(_updateBubbles)
+          ..repeat();
   }
 
   void _updateBubbles() {
@@ -1443,7 +1557,10 @@ class _AnimatedBubblesState extends State<AnimatedBubbles> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: BubblePainter(bubbles: _bubbles, colors: Theme.of(context).colorScheme),
+      painter: BubblePainter(
+        bubbles: _bubbles,
+        colors: Theme.of(context).colorScheme,
+      ),
       child: const SizedBox.expand(),
     );
   }
@@ -1483,8 +1600,9 @@ class BubblePainter extends CustomPainter {
     for (var bubble in bubbles) {
       // Sway left/right based on sine wave
       bubble.time += 0.016; // Simulate delta time
-      final double sway = sin(bubble.time * bubble.swaySpeed) * bubble.swayWidth;
-      
+      final double sway =
+          sin(bubble.time * bubble.swaySpeed) * bubble.swayWidth;
+
       final double actualX = bubble.x * size.width + sway;
       final double actualY = bubble.y * size.height;
 

@@ -37,7 +37,7 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
   void _onContinue() {
     final vm = context.read<PlayerSetupViewModel>();
     vm.setDisplayName(_nameController.text);
-    
+
     if (vm.validate()) {
       context.push('/join-quest');
     }
@@ -50,7 +50,9 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
       appBar: AppBar(
         title: Text(
           'Thiết Lập Người Chơi',
-          style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: AppColors.primary,
+          ),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -60,117 +62,160 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
       body: Consumer<PlayerSetupViewModel>(
         builder: (context, vm, child) {
           return SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Thiết Lập Hồ Sơ 🧭',
-                    style: AppTextStyles.displayLargeMobile.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 900;
+                final horizontalPadding = constraints.maxWidth < 480
+                    ? 16.0
+                    : constraints.maxWidth < 900
+                    ? 24.0
+                    : 40.0;
+
+                return SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    16,
+                    horizontalPadding,
+                    28,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Chọn biệt danh hiển thị trong phòng chờ và chọn ảnh đại diện yêu thích của bạn.',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: isWide ? 980 : double.infinity,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Thiết Lập Hồ Sơ 🧭',
+                            style: AppTextStyles.displayLargeMobile.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Chọn biệt danh hiển thị trong phòng chờ và chọn ảnh đại diện yêu thích của bạn.',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 28),
+
+                          Text(
+                            'BIỆT DANH',
+                            style: AppTextStyles.labelMedium.copyWith(
+                              color: AppColors.primary,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: _nameController,
+                            decoration: InputDecoration(
+                              hintText: 'Nhập biệt danh...',
+                              filled: true,
+                              fillColor: Colors.white,
+                              prefixIcon: const Icon(
+                                Icons.person_outline,
+                                color: AppColors.primary,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(
+                                  color: AppColors.outlineVariant,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(
+                                  color: AppColors.primary,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 28),
+
+                          Text(
+                            'CHỌN LINH VẬT',
+                            style: AppTextStyles.labelMedium.copyWith(
+                              color: AppColors.primary,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          if (vm.isLoading)
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(32.0),
+                                child: CircularProgressIndicator(),
+                              ),
+                            )
+                          else
+                            AvatarPicker(
+                              avatars: vm.avatars,
+                              selectedAvatarId: vm.avatarId,
+                              onSelect: vm.selectAvatar,
+                            ),
+                          const SizedBox(height: 28),
+
+                          if (vm.errorMessage != null) ...[
+                            Text(
+                              vm.errorMessage!,
+                              style: AppTextStyles.labelMedium.copyWith(
+                                color: AppColors.error,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+
+                          Align(
+                            alignment: Alignment.center,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: isWide ? 420 : double.infinity,
+                              ),
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: _onContinue,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        AppColors.secondaryContainer,
+                                    foregroundColor:
+                                        AppColors.onSecondaryContainer,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    elevation: 3,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Lưu & Tiếp tục',
+                                    style: AppTextStyles.bodyLarge.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 32),
-                  
-                  // Name Field
-                  Text(
-                    'BIỆT DANH',
-                    style: AppTextStyles.labelMedium.copyWith(
-                      color: AppColors.primary,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                      hintText: 'Nhập biệt danh...',
-                      filled: true,
-                      fillColor: Colors.white,
-                      prefixIcon: const Icon(Icons.person_outline, color: AppColors.primary),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: AppColors.outlineVariant),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                      ),
-                    ),
-                    style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 32),
-                  
-                  // Avatar Pick
-                  Text(
-                    'CHỌN AVATAR',
-                    style: AppTextStyles.labelMedium.copyWith(
-                      color: AppColors.primary,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  if (vm.isLoading)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(32.0),
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
-                  else ...[
-                    AvatarPicker(
-                      avatars: vm.avatars,
-                      selectedAvatarId: vm.avatarId,
-                      onSelect: vm.selectAvatar,
-                    ),
-                  ],
-                  const SizedBox(height: 32),
-                  
-                  // Error message
-                  if (vm.errorMessage != null) ...[
-                    Text(
-                      vm.errorMessage!,
-                      style: AppTextStyles.labelMedium.copyWith(
-                        color: AppColors.error,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                  
-                  // Continue Button
-                  ElevatedButton(
-                    onPressed: _onContinue,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondaryContainer, // Sunny Yellow
-                      foregroundColor: AppColors.onSecondaryContainer,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Text(
-                      'Lưu & Tiếp tục',
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           );
         },

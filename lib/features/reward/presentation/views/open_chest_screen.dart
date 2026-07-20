@@ -13,10 +13,7 @@ import '../widgets/sparkle_particles.dart';
 class OpenChestScreen extends StatefulWidget {
   final String roomId;
 
-  const OpenChestScreen({
-    super.key,
-    required this.roomId,
-  });
+  const OpenChestScreen({super.key, required this.roomId});
 
   @override
   State<OpenChestScreen> createState() => _OpenChestScreenState();
@@ -36,7 +33,9 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
   }
 
   Future<void> _onClaim(String userId) async {
-    final success = await context.read<OpenChestViewModel>().claimReward(userId);
+    final success = await context.read<OpenChestViewModel>().claimReward(
+      userId,
+    );
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -52,14 +51,17 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
     final vm = context.watch<OpenChestViewModel>();
     final authVm = context.watch<AuthViewModel>();
     final playerSetupVm = context.watch<PlayerSetupViewModel>();
-    final userId = authVm.currentUser?.uid ?? playerSetupVm.playerId ?? 'anonymous';
+    final userId =
+        authVm.currentUser?.uid ?? playerSetupVm.playerId ?? 'anonymous';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4EBE1), // Vintage parchment background
       appBar: AppBar(
         title: Text(
           'Phòng Kho Báu',
-          style: AppTextStyles.headlineMedium.copyWith(color: AppColors.primary),
+          style: AppTextStyles.headlineMedium.copyWith(
+            color: AppColors.primary,
+          ),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -91,7 +93,10 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
             ),
 
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -99,7 +104,9 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
 
                   // Stage Header
                   Text(
-                    vm.isOpened ? 'Tìm Thấy Kho Báu! 🎉' : 'Nhận Phần Thưởng! 🎁',
+                    vm.isOpened
+                        ? 'Tìm Thấy Kho Báu! 🎉'
+                        : 'Nhận Phần Thưởng! 🎁',
                     style: AppTextStyles.displayLargeMobile.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
@@ -169,7 +176,9 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
                   if (vm.errorMessage != null) ...[
                     Text(
                       vm.errorMessage!,
-                      style: AppTextStyles.labelMedium.copyWith(color: AppColors.error),
+                      style: AppTextStyles.labelMedium.copyWith(
+                        color: AppColors.error,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
@@ -213,7 +222,7 @@ class _OpenChestScreenState extends State<OpenChestScreen> {
                           ),
                         ),
                         child: Text(
-                          'Xem Bảng Xếp Hạng Mùa',
+                          'Xem Bảng Xếp Hạng',
                           style: AppTextStyles.bodyLarge.copyWith(
                             fontWeight: FontWeight.bold,
                           ),

@@ -1,1 +1,25 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"quizapptravel","appId":"1:58793994198:android:ed695851253034c8332677","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"quizapptravel","configurations":{"android":"1:58793994198:android:ed695851253034c8332677","ios":"1:58793994198:ios:aad8b149fffe682c332677"}}}}}}
+﻿{
+    "flutter":  {
+                    "platforms":  {
+                                      "android":  {
+                                                      "default":  {
+                                                                      "projectId":  "quizapptravel",
+                                                                      "appId":  "1:58793994198:android:ed695851253034c8332677",
+                                                                      "fileOutput":  "android/app/google-services.json"
+                                                                  }
+                                                  },
+                                      "dart":  {
+                                                   "lib/firebase_options.dart":  {
+                                                                                     "projectId":  "quizapptravel",
+                                                                                     "configurations":  {
+                                                                                                            "android":  "1:58793994198:android:ed695851253034c8332677",
+                                                                                                            "ios":  "1:58793994198:ios:aad8b149fffe682c332677"
+                                                                                                        }
+                                                                                 }
+                                               }
+                                  }
+                },
+    "firestore":  {
+                      "indexes":  "firestore.indexes.json"
+                  }
+}
