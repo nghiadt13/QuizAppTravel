@@ -1,4 +1,4 @@
-﻿import 'dart:math';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -460,12 +460,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                         ),
                                       ),
                                       const SizedBox(width: 12),
-                                      Text(
-                                        'Đăng nhập bằng Google',
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: colors.onSecondaryContainer,
-                                            ),
+                                      Flexible(
+                                        child: Text(
+                                          'Đăng nhập bằng Google',
+                                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: colors.onSecondaryContainer,
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
                                     ],
                                   ),
