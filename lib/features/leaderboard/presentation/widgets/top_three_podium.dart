@@ -94,7 +94,6 @@ class TopThreePodium extends StatelessWidget {
                   radius: hasCrown ? 30 : 24,
                 ),
               ),
-              ),
               // Crown Overlay for 1st
               if (hasCrown)
                 const Positioned(
