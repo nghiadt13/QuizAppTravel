@@ -464,7 +464,14 @@ class _LobbyScreenState extends State<LobbyScreen>
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           child: ElevatedButton(
-            onPressed: canStart ? lobbyVm.startQuest : null,
+            onPressed: canStart
+                ? () async {
+                    await lobbyVm.startQuest();
+                    if (mounted) {
+                      context.push('/live-monitoring/${widget.roomId}');
+                    }
+                  }
+                : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: canStart ? AppColors.tertiaryContainer : AppColors.surfaceVariant,
               foregroundColor: canStart ? Colors.white : AppColors.outline,
@@ -486,7 +493,7 @@ class _LobbyScreenState extends State<LobbyScreen>
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  canStart ? 'Bắt đầu chơi' : 'Đang chờ người chơi...',
+                  canStart ? 'Bắt đầu & Trình chiếu' : 'Đang chờ người chơi...',
                   style: AppTextStyles.bodyLarge.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -496,7 +503,22 @@ class _LobbyScreenState extends State<LobbyScreen>
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
+        // Live Presentation Monitor Button
+        ElevatedButton.icon(
+          onPressed: () => context.push('/live-monitoring/${widget.roomId}'),
+          icon: const Icon(Icons.connected_tv_rounded, size: 20),
+          label: const Text('📺 Mở Màn Trình Chiếu Live'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
         // Close Room Button
         OutlinedButton(
           onPressed: () async {

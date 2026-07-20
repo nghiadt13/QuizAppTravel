@@ -8,7 +8,7 @@ import '../../features/home/presentation/views/profile_tab_screen.dart';
 import '../../features/home/presentation/views/quests_tab_screen.dart';
 import '../../features/home/presentation/views/shop_tab_screen.dart';
 import '../../features/home/presentation/views/history_tab_screen.dart';
-import '../../features/live_monitoring/presentation/views/host_control_screen.dart';
+import '../../features/live_monitoring/presentation/views/live_monitoring_screen.dart';
 import '../../features/quest_room/presentation/views/player_setup_screen.dart';
 import '../../features/quest_room/presentation/views/create_room_screen.dart';
 import '../../features/quest_room/presentation/views/join_room_screen.dart';
@@ -109,7 +109,7 @@ class AppRouter {
         path: '/live-monitoring/:roomId',
         builder: (context, state) {
           final roomId = state.pathParameters['roomId'] ?? '';
-          return HostControlScreen(roomId: roomId);
+          return LiveMonitoringScreen(roomId: roomId);
         },
       ),
       GoRoute(
