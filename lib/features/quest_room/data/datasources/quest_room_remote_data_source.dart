@@ -104,12 +104,13 @@ class QuestRoomRemoteDataSourceImpl implements IQuestRoomRemoteDataSource {
         .collection('rooms')
         .doc(roomId)
         .collection('participants')
-        .orderBy('joinedAt', descending: false)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
+      final list = snapshot.docs
           .map((doc) => ParticipantDto.fromFirestore(doc.data(), doc.id))
           .toList();
+      list.sort((a, b) => a.joinedAt.compareTo(b.joinedAt));
+      return list;
     });
   }
 
@@ -239,9 +240,11 @@ class QuestRoomRemoteDataSourceImpl implements IQuestRoomRemoteDataSource {
           .collection('participants')
           .get();
 
-      return snapshot.docs
+      final list = snapshot.docs
           .map((doc) => ParticipantDto.fromFirestore(doc.data(), doc.id))
           .toList();
+      list.sort((a, b) => a.joinedAt.compareTo(b.joinedAt));
+      return list;
     } catch (_) {
       return [];
     }

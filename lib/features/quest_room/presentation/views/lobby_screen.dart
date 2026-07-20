@@ -520,7 +520,7 @@ class _LobbyScreenState extends State<LobbyScreen>
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  canStart ? 'Bắt đầu & Trình chiếu' : 'Đang chờ người chơi...',
+                  canStart ? 'Bắt đầu' : 'Đang chờ người chơi...',
                   style: AppTextStyles.bodyLarge.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -534,8 +534,11 @@ class _LobbyScreenState extends State<LobbyScreen>
         // Live Presentation Monitor Button
         ElevatedButton.icon(
           onPressed: () => context.push('/live-monitoring/${widget.roomId}'),
-          icon: const Icon(Icons.connected_tv_rounded, size: 20),
-          label: const Text('📺 Mở Màn Trình Chiếu Live'),
+          icon: const Icon(Icons.leaderboard_rounded, size: 20),
+          label: const Text(
+            'Xem bảng xếp hạng',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
