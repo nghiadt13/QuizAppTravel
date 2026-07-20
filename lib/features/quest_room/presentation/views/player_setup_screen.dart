@@ -51,13 +51,14 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
         title: Text(
           'Thiết Lập Người Chơi',
           style: AppTextStyles.headlineMedium.copyWith(
-            color: AppColors.primary,
+            color: AppColors.onSurface,
+            fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.primary),
+        iconTheme: const IconThemeData(color: AppColors.onSurface),
       ),
       body: Consumer<PlayerSetupViewModel>(
         builder: (context, vm, child) {
@@ -89,7 +90,7 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                           Text(
                             'Thiết Lập Hồ Sơ 🧭',
                             style: AppTextStyles.displayLargeMobile.copyWith(
-                              color: AppColors.primary,
+                              color: AppColors.onSurface,
                               fontWeight: FontWeight.bold,
                             ),
                             textAlign: TextAlign.center,
@@ -107,7 +108,8 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                           Text(
                             'BIỆT DANH',
                             style: AppTextStyles.labelMedium.copyWith(
-                              color: AppColors.primary,
+                              color: AppColors.onSurface,
+                              fontWeight: FontWeight.bold,
                               letterSpacing: 1.2,
                             ),
                           ),
@@ -116,11 +118,14 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                             controller: _nameController,
                             decoration: InputDecoration(
                               hintText: 'Nhập biệt danh...',
+                              hintStyle: AppTextStyles.bodyMedium.copyWith(
+                                color: AppColors.outline,
+                              ),
                               filled: true,
                               fillColor: Colors.white,
                               prefixIcon: const Icon(
                                 Icons.person_outline,
-                                color: AppColors.primary,
+                                color: AppColors.onSurface,
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -138,6 +143,7 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                             ),
                             style: AppTextStyles.bodyMedium.copyWith(
                               fontWeight: FontWeight.bold,
+                              color: AppColors.onSurface,
                             ),
                           ),
                           const SizedBox(height: 28),
@@ -145,7 +151,8 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                           Text(
                             'CHỌN LINH VẬT',
                             style: AppTextStyles.labelMedium.copyWith(
-                              color: AppColors.primary,
+                              color: AppColors.onSurface,
+                              fontWeight: FontWeight.bold,
                               letterSpacing: 1.2,
                             ),
                           ),

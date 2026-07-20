@@ -96,7 +96,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
     createVm.toggleIsPublic(true);
     final room = await createVm.createRoom(user.uid);
     if (room != null && mounted) {
-      context.replace('/lobby/${room.id}');
+      context.replace('/lobby/${room.id}', extra: room);
     }
   }
 

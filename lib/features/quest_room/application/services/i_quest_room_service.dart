@@ -26,4 +26,5 @@ abstract interface class IQuestRoomService {
   Future<List<QuestRoom>> getAllRooms({int limit = 30});
   Future<List<Participant>> getParticipants(String roomId);
   Future<List<QuestRoom>> getLeaderboardRoomsForUser(String userId, {required bool isAdmin});
+  Future<QuestRoom?> getRoomById(String roomId);
 }

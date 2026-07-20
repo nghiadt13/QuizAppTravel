@@ -122,4 +122,11 @@ class QuestRoomRepositoryImpl implements IQuestRoomRepository {
     final list = await _remoteDataSource.fetchParticipants(roomId);
     return list.map((dto) => _participantMapper.map(dto)).toList();
   }
+
+  @override
+  Future<QuestRoom?> getRoomById(String roomId) async {
+    final dto = await _remoteDataSource.fetchRoomById(roomId);
+    if (dto == null) return null;
+    return _roomMapper.map(dto);
+  }
 }

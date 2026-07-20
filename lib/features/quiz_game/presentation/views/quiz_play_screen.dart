@@ -56,6 +56,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
 
       final quizVm = context.read<QuizPlayViewModel>();
       quizVm.setRoomAndUser(widget.roomId, userId);
+      quizVm.listenToRoomStatus(widget.roomId);
       quizVm.loadQuestions(widget.roomId);
     });
   }
@@ -63,6 +64,57 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   @override
   Widget build(BuildContext context) {
     final quizVm = context.watch<QuizPlayViewModel>();
+
+    if (quizVm.isRoomEndedByHost && !quizVm.isFinished) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: AppColors.errorContainer.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.cancel_outlined,
+                    size: 48,
+                    color: AppColors.error,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Trò chơi đã kết thúc',
+                  style: AppTextStyles.headlineMedium.copyWith(
+                    color: AppColors.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Chủ phòng đã dừng hoặc hủy phòng thi đấu này.',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton.icon(
+                  onPressed: () => context.go('/home/quests'),
+                  icon: const Icon(Icons.home_rounded),
+                  label: const Text('Quay về trang chủ'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     if (quizVm.isLoading) {
       return const Scaffold(

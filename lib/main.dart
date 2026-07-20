@@ -154,8 +154,7 @@ class MyApp extends StatelessWidget {
         title: 'Quiz Travel 🗺️ - Đấu Trường Quiz & Du Lịch',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
+        themeMode: ThemeMode.light,
         routerConfig: appRouter.router,
       ),
     );

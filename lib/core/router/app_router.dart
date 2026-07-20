@@ -19,6 +19,7 @@ import '../../features/quiz/presentation/views/create_quiz_screen.dart';
 import '../../features/quiz/presentation/views/quiz_detail_screen.dart';
 import '../../features/quiz/presentation/views/all_topics_screen.dart';
 import '../../features/quiz/domain/entities/quiz_set.dart';
+import '../../features/quest_room/domain/entities/quest_room.dart';
 
 class AppRouter {
   final GoRouter router = GoRouter(
@@ -95,7 +96,8 @@ class AppRouter {
         path: '/lobby/:roomId',
         builder: (context, state) {
           final roomId = state.pathParameters['roomId'] ?? '';
-          return LobbyScreen(roomId: roomId);
+          final initialRoom = state.extra as QuestRoom?;
+          return LobbyScreen(roomId: roomId, initialRoom: initialRoom);
         },
       ),
       GoRoute(

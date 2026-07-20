@@ -25,17 +25,47 @@ class LobbyViewModel extends ChangeNotifier {
   StreamSubscription<QuestRoom?>? _roomSubscription;
   StreamSubscription<List<Participant>>? _participantsSubscription;
 
-  void init(String roomId) {
-    _isLoading = true;
+  Future<void> init(String roomId, {QuestRoom? initialRoom}) async {
     _errorMessage = null;
-    _room = null;
     _participants = [];
-    notifyListeners();
+
+    if (initialRoom != null && initialRoom.id == roomId) {
+      _room = initialRoom;
+      _isLoading = false;
+      notifyListeners();
+    } else {
+      _isLoading = true;
+      _room = null;
+      notifyListeners();
+    }
 
     _roomSubscription?.cancel();
     _participantsSubscription?.cancel();
 
-    Timer(const Duration(seconds: 5), () {
+    // 1. Direct fetch immediately with a strict timeout so UI never hangs
+    try {
+      final directRoom = await _service.getRoomById(roomId).timeout(
+        const Duration(milliseconds: 2500),
+      );
+      if (directRoom != null) {
+        _room = directRoom;
+        _isLoading = false;
+        notifyListeners();
+      }
+    } catch (_) {}
+
+    try {
+      final directParticipants = await _service.getParticipants(roomId).timeout(
+        const Duration(milliseconds: 2500),
+      );
+      if (directParticipants.isNotEmpty) {
+        _participants = directParticipants;
+        notifyListeners();
+      }
+    } catch (_) {}
+
+    // Safety timeout to turn off loading after 2.5 seconds
+    Timer(const Duration(milliseconds: 2500), () {
       if (_isLoading) {
         _isLoading = false;
         notifyListeners();
@@ -44,12 +74,16 @@ class LobbyViewModel extends ChangeNotifier {
 
     _roomSubscription = _service.watchRoom(roomId).listen(
       (room) {
-        _room = room;
+        if (room != null) {
+          _room = room;
+        }
         _isLoading = false;
         notifyListeners();
       },
       onError: (error) {
-        _errorMessage = error.toString();
+        if (_room == null) {
+          _errorMessage = error.toString();
+        }
         _isLoading = false;
         notifyListeners();
       },

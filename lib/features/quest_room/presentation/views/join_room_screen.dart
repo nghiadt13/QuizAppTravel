@@ -56,7 +56,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
     );
 
     if (room != null && mounted) {
-      context.replace('/lobby/${room.id}');
+      context.replace('/lobby/${room.id}', extra: room);
     }
   }
 

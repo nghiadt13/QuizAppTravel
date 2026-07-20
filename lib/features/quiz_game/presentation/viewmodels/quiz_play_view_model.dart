@@ -305,9 +305,42 @@ class QuizPlayViewModel extends ChangeNotifier {
     } catch (_) {}
   }
 
+  bool _isRoomEndedByHost = false;
+  bool get isRoomEndedByHost => _isRoomEndedByHost;
+
+  StreamSubscription? _roomStatusSubscription;
+
+  void listenToRoomStatus(String roomId) {
+    _roomStatusSubscription?.cancel();
+    _isRoomEndedByHost = false;
+
+    _roomStatusSubscription = FirebaseFirestore.instance
+        .collection('rooms')
+        .doc(roomId)
+        .snapshots()
+        .listen((doc) {
+      if (!doc.exists) {
+        _isRoomEndedByHost = true;
+        _timer?.cancel();
+        notifyListeners();
+        return;
+      }
+      final data = doc.data();
+      final status = data?['status'] as String?;
+      if (status == 'finished' || status == 'closed') {
+        if (!_isFinished) {
+          _isRoomEndedByHost = true;
+          _timer?.cancel();
+          notifyListeners();
+        }
+      }
+    });
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
+    _roomStatusSubscription?.cancel();
     super.dispose();
   }
 }

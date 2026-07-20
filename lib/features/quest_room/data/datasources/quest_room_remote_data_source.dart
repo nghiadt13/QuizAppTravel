@@ -22,6 +22,7 @@ abstract interface class IQuestRoomRemoteDataSource {
   Future<List<QuestRoomDto>> fetchRoomsByHost(String hostId);
   Future<List<QuestRoomDto>> fetchAllRooms({int limit = 30});
   Future<List<ParticipantDto>> fetchParticipants(String roomId);
+  Future<QuestRoomDto?> fetchRoomById(String roomId);
 }
 
 class QuestRoomRemoteDataSourceImpl implements IQuestRoomRemoteDataSource {
@@ -243,6 +244,19 @@ class QuestRoomRemoteDataSourceImpl implements IQuestRoomRemoteDataSource {
           .toList();
     } catch (_) {
       return [];
+    }
+  }
+
+  @override
+  Future<QuestRoomDto?> fetchRoomById(String roomId) async {
+    try {
+      final doc = await _firestore.collection('rooms').doc(roomId).get();
+      if (!doc.exists || doc.data() == null) return null;
+      return QuestRoomDto.fromFirestore(doc.data()!, doc.id);
+    } on FirebaseException catch (e) {
+      throw AppException(e.message ?? 'Failed to fetch room by ID.', code: e.code);
+    } catch (e) {
+      throw AppException(e.toString());
     }
   }
 }

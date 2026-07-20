@@ -88,7 +88,7 @@ class _BrowseQuestsScreenState extends State<BrowseQuestsScreen> {
 
       if (mounted) {
         if (room != null) {
-          context.replace('/lobby/${room.id}');
+          context.replace('/lobby/${room.id}', extra: room);
         } else {
           setState(() => _isJoining = false);
           if (joinVm.errorMessage != null) {

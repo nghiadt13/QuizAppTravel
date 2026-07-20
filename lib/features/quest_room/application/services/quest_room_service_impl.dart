@@ -172,6 +172,13 @@ class QuestRoomServiceImpl implements IQuestRoomService {
     return userRooms;
   }
 
+  @override
+  Future<QuestRoom?> getRoomById(String roomId) async {
+    final cleanId = roomId.trim();
+    if (cleanId.isEmpty) return null;
+    return _repository.getRoomById(cleanId);
+  }
+
   String _generateRandomPin() {
     final random = Random();
     final buffer = StringBuffer();

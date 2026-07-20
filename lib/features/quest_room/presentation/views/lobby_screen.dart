@@ -14,10 +14,12 @@ import '../../application/services/i_quest_room_service.dart';
 
 class LobbyScreen extends StatefulWidget {
   final String roomId;
+  final QuestRoom? initialRoom;
 
   const LobbyScreen({
     super.key,
     required this.roomId,
+    this.initialRoom,
   });
 
   @override
@@ -35,7 +37,7 @@ class _LobbyScreenState extends State<LobbyScreen>
   void initState() {
     super.initState();
     _lobbyVm = context.read<LobbyViewModel>();
-    _lobbyVm.init(widget.roomId);
+    _lobbyVm.init(widget.roomId, initialRoom: widget.initialRoom);
     _lobbyVm.addListener(_onLobbyChanged);
 
     _fadeController = AnimationController(
@@ -75,6 +77,31 @@ class _LobbyScreenState extends State<LobbyScreen>
         context.replace('/live-monitoring/${widget.roomId}');
       } else {
         context.replace('/quiz/${widget.roomId}');
+      }
+      return;
+    }
+
+    if (!_lobbyVm.isLoading && (room == null || room.status == RoomStatus.finished)) {
+      final authVm = context.read<AuthViewModel>();
+      final isHost = authVm.currentUser?.uid == room?.hostId;
+      if (!isHost) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Phòng chơi đã đóng'),
+            content: const Text('Chủ phòng đã kết thúc hoặc hủy phòng chơi này.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  if (mounted) context.go('/home/quests');
+                },
+                child: const Text('Đồng ý'),
+              ),
+            ],
+          ),
+        );
       }
     }
   }

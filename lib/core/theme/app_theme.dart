@@ -41,6 +41,12 @@ class AppTheme {
         labelMedium: AppTextStyles.labelMedium,
         labelSmall: AppTextStyles.labelSmall,
       ),
+      inputDecorationTheme: InputDecorationTheme(
+        hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.outline),
+        labelStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.onSurface),
+        suffixIconColor: AppColors.onSurfaceVariant,
+        prefixIconColor: AppColors.primary,
+      ),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
