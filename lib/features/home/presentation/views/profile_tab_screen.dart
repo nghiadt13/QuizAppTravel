@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_avatar.dart';
 import '../../../auth/presentation/viewmodels/auth_view_model.dart';
 import '../../../quiz/presentation/viewmodels/quiz_manager_view_model.dart';
 import '../viewmodels/profile_view_model.dart';
@@ -89,24 +90,10 @@ class _ProfileTabScreenState extends State<ProfileTabScreen> {
                       child: Column(
                         children: [
                           // Avatar
-                          CircleAvatar(
+                          AppAvatar(
+                            avatarUrl: user.avatarUrl,
+                            displayName: user.displayName,
                             radius: 50,
-                            backgroundColor: colors.primaryContainer.withValues(alpha: 0.2),
-                            backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
-                                ? NetworkImage(user.avatarUrl!)
-                                : null,
-                            child: user.avatarUrl == null || user.avatarUrl!.isEmpty
-                                ? Text(
-                                    user.displayName.isNotEmpty
-                                        ? user.displayName[0].toUpperCase()
-                                        : 'H',
-                                    style: TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.bold,
-                                      color: colors.primary,
-                                    ),
-                                  )
-                                : null,
                           ),
                           const SizedBox(height: 16),
                           // Name

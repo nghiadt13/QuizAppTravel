@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_avatar.dart';
 import '../../domain/entities/leaderboard_entry.dart';
-import 'leaderboard_avatar.dart';
 
 class TopThreePodium extends StatelessWidget {
   final List<LeaderboardEntry> topThree;
 
-  const TopThreePodium({super.key, required this.topThree});
+  const TopThreePodium({
+    super.key,
+    required this.topThree,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -77,12 +80,20 @@ class TopThreePodium extends StatelessWidget {
             clipBehavior: Clip.none,
             children: [
               // Avatar
-              LeaderboardAvatar(
-                avatarUrl: entry.avatarUrl,
-                size: hasCrown ? 64 : 52,
-                fontSize: hasCrown ? 36 : 28,
-                borderColor: color,
-                borderWidth: 3,
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: color,
+                    width: 3,
+                  ),
+                ),
+                child: AppAvatar(
+                  avatarUrl: entry.avatarUrl,
+                  displayName: entry.displayName,
+                  radius: hasCrown ? 30 : 24,
+                ),
+              ),
               ),
               // Crown Overlay for 1st
               if (hasCrown)

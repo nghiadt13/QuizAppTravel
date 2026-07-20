@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_avatar.dart';
 import '../../../auth/presentation/viewmodels/auth_view_model.dart';
 import '../../presentation/viewmodels/quiz_play_view_model.dart';
 import '../../presentation/widgets/countdown_timer.dart';
@@ -315,9 +316,6 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                               );
                             }
 
-                            final emoji = _getEmoji(p.avatarId);
-                            final avatarBg = _getAvatarBg(p.avatarId);
-
                             return Container(
                               color: isMe
                                   ? AppColors.primary.withValues(alpha: 0.03)
@@ -330,14 +328,10 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                                 children: [
                                   rankWidget,
                                   const SizedBox(width: 12),
-
-                                  CircleAvatar(
+                                  AppAvatar(
+                                    avatarUrl: p.avatarId,
+                                    displayName: p.displayName,
                                     radius: 16,
-                                    backgroundColor: avatarBg,
-                                    child: Text(
-                                      emoji,
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
                                   ),
                                   const SizedBox(width: 12),
 
@@ -625,65 +619,8 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
     );
   }
 
-  String _getEmoji(String avatarUrl) {
-    switch (avatarUrl.toLowerCase()) {
-      case 'dog':
-        return '🐶';
-      case 'cat':
-        return '🐱';
-      case 'bird':
-        return '🐦';
-      case 'rabbit':
-        return '🐰';
-      case 'fox':
-        return '🦊';
-      case 'owl':
-        return '🦉';
-      case 'panda':
-        return '🐼';
-      case 'bear':
-        return '🐻';
-      case 'koala':
-        return '🐨';
-      case 'penguin':
-        return '🐧';
-      case 'monkey':
-        return '🐵';
-      case 'tiger':
-        return '🐯';
-      default:
-        return '👤';
-    }
-  }
-
-  Color _getAvatarBg(String avatarUrl) {
-    switch (avatarUrl.toLowerCase()) {
-      case 'dog':
-        return const Color(0xFFFFECE0);
-      case 'cat':
-        return const Color(0xFFE8F5E9);
-      case 'bird':
-        return const Color(0xFFE3F2FD);
-      case 'rabbit':
-        return const Color(0xFFF3E5F5);
-      case 'fox':
-        return const Color(0xFFFFF3E0);
-      case 'owl':
-        return const Color(0xFFECEFF1);
-      case 'panda':
-        return const Color(0xFFF5F5F5);
-      case 'bear':
-        return const Color(0xFFFFF8E1);
-      case 'koala':
-        return const Color(0xFFE0F2F1);
-      case 'penguin':
-        return const Color(0xFFE1F5FE);
-      case 'monkey':
-        return const Color(0xFFFFF1E6);
-      case 'tiger':
-        return const Color(0xFFFFE0B2);
-      default:
-        return AppColors.surfaceVariant;
-    }
+  String _getCurrentPeriod() {
+    final now = DateTime.now();
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}';
   }
 }

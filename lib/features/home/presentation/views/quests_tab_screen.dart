@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_avatar.dart';
 import '../../../auth/presentation/viewmodels/auth_view_model.dart';
 import '../../../quest_room/presentation/viewmodels/create_room_view_model.dart';
 import '../../../quest_room/presentation/viewmodels/join_room_view_model.dart';
@@ -329,7 +330,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
               children: [
                 Stack(
                   children: [
-                    _buildAvatar(avatarUrl, colors),
+                    _buildAvatar(avatarUrl, colors, displayName: displayName),
                     Positioned(
                       right: 0,
                       bottom: 0,
@@ -1408,92 +1409,12 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
     );
   }
 
-  Widget _buildAvatar(String? avatarUrl, ColorScheme colors) {
-    if (avatarUrl == null || avatarUrl.isEmpty) {
-      return CircleAvatar(
-        radius: 20,
-        backgroundColor: colors.primary.withValues(alpha: 0.1),
-        child: Icon(Icons.person, color: colors.primary, size: 20),
-      );
-    }
-
-    if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) {
-      return CircleAvatar(
-        radius: 20,
-        backgroundColor: colors.primary.withValues(alpha: 0.1),
-        backgroundImage: NetworkImage(avatarUrl),
-      );
-    }
-
-    final emoji = _getEmoji(avatarUrl);
-    final bg = _getAvatarBg(avatarUrl);
-    return CircleAvatar(
+  Widget _buildAvatar(String? avatarUrl, ColorScheme colors, {String? displayName}) {
+    return AppAvatar(
+      avatarUrl: avatarUrl,
+      displayName: displayName,
       radius: 20,
-      backgroundColor: bg,
-      child: Text(emoji, style: const TextStyle(fontSize: 20)),
     );
-  }
-
-  String _getEmoji(String avatarUrl) {
-    switch (avatarUrl.toLowerCase()) {
-      case 'dog':
-        return '🐶';
-      case 'cat':
-        return '🐱';
-      case 'bird':
-        return '🐦';
-      case 'rabbit':
-        return '🐰';
-      case 'fox':
-        return '🦊';
-      case 'owl':
-        return '🦉';
-      case 'panda':
-        return '🐼';
-      case 'bear':
-        return '🐻';
-      case 'koala':
-        return '🐨';
-      case 'penguin':
-        return '🐧';
-      case 'monkey':
-        return '🐵';
-      case 'tiger':
-        return '🐯';
-      default:
-        return '👤';
-    }
-  }
-
-  Color _getAvatarBg(String avatarUrl) {
-    switch (avatarUrl.toLowerCase()) {
-      case 'dog':
-        return const Color(0xFFFFECE0);
-      case 'cat':
-        return const Color(0xFFE8F5E9);
-      case 'bird':
-        return const Color(0xFFE3F2FD);
-      case 'rabbit':
-        return const Color(0xFFF3E5F5);
-      case 'fox':
-        return const Color(0xFFFFF3E0);
-      case 'owl':
-        return const Color(0xFFECEFF1);
-      case 'panda':
-        return const Color(0xFFF5F5F5);
-      case 'bear':
-        return const Color(0xFFFFF8E1);
-      case 'koala':
-        return const Color(0xFFE0F2F1);
-      case 'penguin':
-        return const Color(0xFFE1F5FE);
-      case 'monkey':
-        return const Color(0xFFFFF1E6);
-      case 'tiger':
-        return const Color(0xFFFFE0B2);
-      default:
-        return AppColors.outlineVariant;
-    }
   }
 }
 
