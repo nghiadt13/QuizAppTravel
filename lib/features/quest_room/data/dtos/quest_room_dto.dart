@@ -23,17 +23,21 @@ class QuestRoomDto {
   });
 
   factory QuestRoomDto.fromFirestore(Map<String, dynamic> json, String id) {
+    DateTime parsedDate = DateTime.now();
+    final rawDate = json['createdAt'];
+    if (rawDate is Timestamp) {
+      parsedDate = rawDate.toDate();
+    }
+
     return QuestRoomDto(
       id: id,
-      pinCode: json['pinCode'] ?? '',
-      topic: json['topic'] ?? '',
-      hostId: json['hostId'] ?? '',
-      status: json['status'] ?? 'waiting',
-      isPublic: json['isPublic'] ?? false,
-      createdAt: json['createdAt'] != null
-          ? (json['createdAt'] as Timestamp).toDate()
-          : DateTime.now(),
-      quizId: json['quizId'] as String?,
+      pinCode: json['pinCode']?.toString() ?? '',
+      topic: json['topic']?.toString() ?? '',
+      hostId: json['hostId']?.toString() ?? '',
+      status: json['status']?.toString() ?? 'waiting',
+      isPublic: json['isPublic'] == true,
+      createdAt: parsedDate,
+      quizId: json['quizId']?.toString(),
     );
   }
 

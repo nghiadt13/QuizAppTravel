@@ -115,8 +115,12 @@ class QuestRoomRemoteDataSourceImpl implements IQuestRoomRemoteDataSource {
   @override
   Stream<QuestRoomDto?> watchRoom(String roomId) {
     return _firestore.collection('rooms').doc(roomId).snapshots().map((doc) {
-      if (!doc.exists || doc.data() == null) return null;
-      return QuestRoomDto.fromFirestore(doc.data()!, doc.id);
+      try {
+        if (!doc.exists || doc.data() == null) return null;
+        return QuestRoomDto.fromFirestore(doc.data()!, doc.id);
+      } catch (e) {
+        return null;
+      }
     });
   }
 

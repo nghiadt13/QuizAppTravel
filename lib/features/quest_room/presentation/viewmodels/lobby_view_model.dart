@@ -28,6 +28,8 @@ class LobbyViewModel extends ChangeNotifier {
   void init(String roomId) {
     _isLoading = true;
     _errorMessage = null;
+    _room = null;
+    _participants = [];
     notifyListeners();
 
     _roomSubscription?.cancel();
