@@ -272,38 +272,6 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
     }
   }
 
-  void _selectRandomTopic(ColorScheme colors) {
-    final quizVm = context.read<QuizManagerViewModel>();
-    if (quizVm.publicQuizzes.isNotEmpty) {
-      final random = Random();
-      final selected =
-          quizVm.publicQuizzes[random.nextInt(quizVm.publicQuizzes.length)];
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('🎲 Chọn ngẫu nhiên: ${selected.title}!'),
-          backgroundColor: colors.primary,
-          duration: const Duration(seconds: 1),
-        ),
-      );
-
-      _startPracticeRoomWithQuiz(selected, colors);
-    } else {
-      final random = Random();
-      final selected = _topics[random.nextInt(_topics.length)];
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('🎲 Chọn ngẫu nhiên: ${selected['title']}!'),
-          backgroundColor: colors.primary,
-          duration: const Duration(seconds: 1),
-        ),
-      );
-
-      _startPracticeRoom(selected['dbTopic'], colors);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -747,56 +715,33 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
                                 letterSpacing: 0.5,
                               ),
                             ),
-                            Row(
-                              children: [
-                                InkWell(
-                                  onTap: () => _selectRandomTopic(colors),
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 4,
-                                    ),
-                                    child: Text(
-                                      '🎲 Ngẫu nhiên',
+                            InkWell(
+                              onTap: () => context.push('/all-topics'),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      'Xem tất cả',
                                       style: TextStyle(
-                                        fontSize: 12,
-                                        color: colors.primary.withValues(alpha: 0.8),
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                        color: colors.primary,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                InkWell(
-                                  onTap: () => context.push('/all-topics'),
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 4,
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      Icons.arrow_forward_ios_rounded,
+                                      size: 12,
+                                      color: colors.primary,
                                     ),
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          'Xem tất cả',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: colors.primary,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 2),
-                                        Icon(
-                                          Icons.arrow_forward_ios_rounded,
-                                          size: 11,
-                                          color: colors.primary,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
                           ],
                         ),
@@ -1402,7 +1347,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
     final style = _topics[styleIndex];
 
     return GestureDetector(
-      onTap: () => context.push('/quiz-detail', extra: quiz),
+      onTap: () => _startPracticeRoomWithQuiz(quiz, colors),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
