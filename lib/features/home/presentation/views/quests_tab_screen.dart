@@ -591,7 +591,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
                                 const SizedBox(height: 20),
                               ],
 
-                              // 6 PIN inputs row
+                              // 6 PIN inputs row (Responsive with gaps on mobile)
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
@@ -604,35 +604,40 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
                                       _pinFocusNode.hasFocus &&
                                       text.length == index;
 
-                                  return GestureDetector(
-                                    onTap: () {
-                                      _pinFocusNode.requestFocus();
-                                    },
-                                    child: Container(
-                                      width: 44,
-                                      height: 48,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.1,
+                                  return Flexible(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        _pinFocusNode.requestFocus();
+                                      },
+                                      child: Container(
+                                        height: 48,
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 2.5,
                                         ),
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(
-                                          color: isFocused
-                                              ? AppColors
-                                                    .secondaryContainer // Sunny Yellow
-                                              : Colors.white.withValues(
-                                                  alpha: 0.2,
-                                                ),
-                                          width: isFocused ? 2 : 1,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          border: Border.all(
+                                            color: isFocused
+                                                ? AppColors
+                                                      .secondaryContainer // Sunny Yellow
+                                                : Colors.white.withValues(
+                                                    alpha: 0.2,
+                                                  ),
+                                            width: isFocused ? 2 : 1,
+                                          ),
                                         ),
-                                      ),
-                                      child: Text(
-                                        char,
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                        child: Text(
+                                          char,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -912,16 +917,19 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
                                 onPressed: () => context.push('/create-room'),
                                 icon: const Icon(Icons.add),
                                 label: const Text(
-                                  'Tạo Phòng Game',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  'TẠO PHÒNG GAME',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: colors.primary,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: AppColors.secondaryContainer,
+                                  foregroundColor: AppColors.onSecondaryContainer,
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 16,
                                   ),
-                                  elevation: 1,
+                                  elevation: 2,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
                                   ),
