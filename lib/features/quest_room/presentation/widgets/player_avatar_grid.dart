@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_avatar.dart';
 import '../../domain/entities/participant.dart';
 
 class PlayerAvatarGrid extends StatelessWidget {
@@ -136,7 +137,7 @@ class PlayerAvatarGrid extends StatelessWidget {
         crossAxisCount: 3,
         crossAxisSpacing: 12,
         mainAxisSpacing: 16,
-        childAspectRatio: 0.85,
+        childAspectRatio: 0.74,
       ),
       itemCount: participants.length,
       itemBuilder: (context, index) {
@@ -307,35 +308,43 @@ class _PlayerCard extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Avatar with gradient background
-                    Container(
-                      width: 58,
-                      height: 58,
-                      decoration: BoxDecoration(
-                        gradient: gradient,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: gradient.colors.first.withValues(alpha: 0.4),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Container(
-                        margin: const EdgeInsets.all(2),
+                    if (participant.avatarId.startsWith('http') ||
+                        participant.avatarId.isEmpty ||
+                        participant.avatarId.contains('/'))
+                      AppAvatar(
+                        avatarUrl: participant.avatarId,
+                        displayName: participant.displayName,
+                        radius: 26,
+                      )
+                    else
+                      Container(
+                        width: 52,
+                        height: 52,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          gradient: gradient,
                           shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: gradient.colors.first.withValues(alpha: 0.4),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
-                        child: Center(
-                          child: Text(
-                            emoji,
-                            style: const TextStyle(fontSize: 32),
+                        child: Container(
+                          margin: const EdgeInsets.all(2),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              emoji,
+                              style: const TextStyle(fontSize: 26),
+                            ),
                           ),
                         ),
                       ),
-                    ),
                     const SizedBox(height: 10),
                     // Name
                     Text(

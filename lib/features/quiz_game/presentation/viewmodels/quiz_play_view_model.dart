@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../domain/entities/player_answer.dart';
 import '../../domain/entities/quiz_question.dart';
@@ -19,6 +20,12 @@ class QuizPlayViewModel extends ChangeNotifier {
 
   int _score = 0;
   int get score => _score;
+
+  int _correctAnswersCount = 0;
+  int get correctAnswersCount => _correctAnswersCount;
+
+  int _incorrectAnswersCount = 0;
+  int get incorrectAnswersCount => _incorrectAnswersCount;
 
   int _timeRemaining = 0;
   int get timeRemaining => _timeRemaining;
@@ -47,6 +54,12 @@ class QuizPlayViewModel extends ChangeNotifier {
   bool _isFinished = false;
   bool get isFinished => _isFinished;
 
+  String _roomTopic = '';
+  String get roomTopic => _roomTopic;
+
+  String? _quizId;
+  String? get quizId => _quizId;
+
   Timer? _timer;
   final Stopwatch _stopwatch = Stopwatch();
 
@@ -63,6 +76,8 @@ class QuizPlayViewModel extends ChangeNotifier {
     _isFinished = false;
     _currentQuestionIndex = 0;
     _score = 0;
+    _correctAnswersCount = 0;
+    _incorrectAnswersCount = 0;
     _selectedAnswerIndex = null;
     _isAnswered = false;
     _feedbackMessage = null;
@@ -71,6 +86,15 @@ class QuizPlayViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      try {
+        final roomDoc = await FirebaseFirestore.instance.collection('rooms').doc(roomId).get();
+        if (roomDoc.exists) {
+          final data = roomDoc.data();
+          _roomTopic = data?['topic'] as String? ?? '';
+          _quizId = data?['quizId'] as String? ?? '';
+        }
+      } catch (_) {}
+
       _questions = await _service.loadQuestions(roomId);
       if (_questions.isNotEmpty) {
         startTimer();
@@ -110,30 +134,27 @@ class QuizPlayViewModel extends ChangeNotifier {
 
   Future<void> _handleTimeout() async {
     if (_isAnswered) return;
-    _isAnswered = true;
-    _selectedAnswerIndex = 0;
+    _timer?.cancel();
     _stopwatch.stop();
-    _feedbackMessage = 'Time\'s Up! ⏰';
-    notifyListeners();
+    _incorrectAnswersCount++;
 
     final question = currentQuestion;
-    if (question == null) return;
+    if (question != null && _roomId.isNotEmpty && _userId.isNotEmpty) {
+      final answer = PlayerAnswer(
+        questionId: question.id,
+        selectedIndex: -1,
+        responseTimeMs: question.timeLimit * 1000,
+        isCorrect: false,
+        pointsEarned: 0,
+      );
 
-    // Timeout always earns 0 points
-    final answer = PlayerAnswer(
-      questionId: question.id,
-      selectedIndex: 0,
-      responseTimeMs: question.timeLimit * 1000,
-      isCorrect: false,
-      pointsEarned: 0,
-    );
-
-    try {
-      if (_roomId.isNotEmpty && _userId.isNotEmpty) {
+      try {
         await _service.submitAnswer(_roomId, _userId, answer);
         await _service.submitScore(_roomId, _userId, _score);
-      }
-    } catch (_) {}
+      } catch (_) {}
+    }
+
+    nextQuestion();
   }
 
   // To support firestore submission, let's keep track of roomId and userId in the viewmodel
@@ -170,12 +191,14 @@ class QuizPlayViewModel extends ChangeNotifier {
     );
 
     if (answer.isCorrect) {
+      _correctAnswersCount++;
       if (answer.pointsEarned == 200) {
         _feedbackMessage = '+200 Fast Bonus! ⚡';
       } else {
         _feedbackMessage = '+150 Correct! 🎉';
       }
     } else {
+      _incorrectAnswersCount++;
       _feedbackMessage = 'Incorrect! 😢';
     }
 
@@ -236,8 +259,50 @@ class QuizPlayViewModel extends ChangeNotifier {
     } else {
       _isFinished = true;
       _timer?.cancel();
+      _finishParticipantAndCheckRoom();
       notifyListeners();
     }
+  }
+
+  Future<void> _finishParticipantAndCheckRoom() async {
+    if (_roomId.isEmpty || _userId.isEmpty) return;
+    try {
+      final firestore = FirebaseFirestore.instance;
+      // 1. Update participant status to finished
+      await firestore
+          .collection('rooms')
+          .doc(_roomId)
+          .collection('participants')
+          .doc(_userId)
+          .set({
+        'status': 'finished',
+        'score': _score,
+        'playerId': _userId,
+      }, SetOptions(merge: true));
+
+      // 2. Fetch all participants to check if everyone is finished
+      final snapshot = await firestore
+          .collection('rooms')
+          .doc(_roomId)
+          .collection('participants')
+          .get();
+
+      bool allFinished = true;
+      for (final doc in snapshot.docs) {
+        final st = doc.data()['status'] as String?;
+        if (st != 'finished') {
+          allFinished = false;
+          break;
+        }
+      }
+
+      // If all participants in the room are finished (or single player), set room status to finished
+      if (allFinished || snapshot.docs.length <= 1) {
+        await firestore.collection('rooms').doc(_roomId).update({
+          'status': 'finished',
+        });
+      }
+    } catch (_) {}
   }
 
   @override

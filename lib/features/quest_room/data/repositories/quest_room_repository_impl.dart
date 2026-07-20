@@ -110,4 +110,16 @@ class QuestRoomRepositoryImpl implements IQuestRoomRepository {
   Future<void> deleteRoom(String roomId) async {
     await _remoteDataSource.deleteRoom(roomId);
   }
+
+  @override
+  Future<List<QuestRoom>> fetchAllRooms({int limit = 30}) async {
+    final list = await _remoteDataSource.fetchAllRooms(limit: limit);
+    return list.map((dto) => _roomMapper.map(dto)).toList();
+  }
+
+  @override
+  Future<List<Participant>> getParticipants(String roomId) async {
+    final list = await _remoteDataSource.fetchParticipants(roomId);
+    return list.map((dto) => _participantMapper.map(dto)).toList();
+  }
 }

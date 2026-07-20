@@ -144,6 +144,34 @@ class QuestRoomServiceImpl implements IQuestRoomService {
     await _repository.deleteRoom(trimmedId);
   }
 
+  @override
+  Future<List<QuestRoom>> getAllRooms({int limit = 30}) async {
+    return _repository.fetchAllRooms(limit: limit);
+  }
+
+  @override
+  Future<List<Participant>> getParticipants(String roomId) async {
+    return _repository.getParticipants(roomId);
+  }
+
+  @override
+  Future<List<QuestRoom>> getLeaderboardRoomsForUser(String userId, {required bool isAdmin}) async {
+    final allPublic = await _repository.fetchAllRooms(limit: 50);
+    if (isAdmin) {
+      return allPublic;
+    }
+
+    final userRooms = <QuestRoom>[];
+    for (final room in allPublic) {
+      final participants = await _repository.getParticipants(room.id);
+      final joined = participants.any((p) => p.playerId == userId);
+      if (joined || room.hostId == userId) {
+        userRooms.add(room);
+      }
+    }
+    return userRooms;
+  }
+
   String _generateRandomPin() {
     final random = Random();
     final buffer = StringBuffer();

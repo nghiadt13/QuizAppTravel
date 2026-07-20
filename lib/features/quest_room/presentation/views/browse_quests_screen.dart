@@ -6,6 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../viewmodels/browse_quests_view_model.dart';
 import '../viewmodels/player_setup_view_model.dart';
 import '../viewmodels/join_room_view_model.dart';
+import '../../../auth/presentation/viewmodels/auth_view_model.dart';
 import '../widgets/quest_card_tile.dart';
 
 class BrowseQuestsScreen extends StatefulWidget {
@@ -24,6 +25,38 @@ class _BrowseQuestsScreenState extends State<BrowseQuestsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BrowseQuestsViewModel>().fetchPublicRooms();
     });
+  }
+
+  void _showUpgradeAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.workspace_premium_rounded, color: Colors.amber, size: 28),
+            SizedBox(width: 10),
+            Text(
+              'Nâng Cấp Tài Khoản',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Bạn phải nâng cấp tài khoản để tạo phòng game',
+          style: TextStyle(fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'Đóng',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _joinPublicRoom(String pinCode) async {
@@ -173,7 +206,15 @@ class _BrowseQuestsScreenState extends State<BrowseQuestsScreen> {
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 48.0),
                                   child: ElevatedButton(
-                                    onPressed: () => context.push('/create-room'),
+                                    onPressed: () {
+                                       final authVm = context.read<AuthViewModel>();
+                                       final email = authVm.currentUser?.email;
+                                       if (email != null && email.trim().toLowerCase() == 'll.stylish73@gmail.com') {
+                                         context.push('/create-room');
+                                       } else {
+                                         _showUpgradeAccountDialog(context);
+                                       }
+                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: AppColors.primary,
                                       foregroundColor: Colors.white,

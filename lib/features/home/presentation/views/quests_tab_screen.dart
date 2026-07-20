@@ -32,6 +32,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
   final List<Map<String, dynamic>> _topics = [
     {
       'title': 'Khám Phá Vũ Trụ',
+      'systemQuizId': 'system_space_explorer',
       'dbTopic': 'Science & Technology',
       'questions': '8 Câu hỏi',
       'tag': 'Rất cuốn',
@@ -41,6 +42,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
     },
     {
       'title': 'Thần Đồng Công Nghệ',
+      'systemQuizId': 'system_tech_legend',
       'dbTopic': 'Science & Technology',
       'questions': '10 Câu hỏi',
       'tag': 'Thực tế',
@@ -50,8 +52,9 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
     },
     {
       'title': 'Sử Việt Hào Hùng',
+      'systemQuizId': 'system_vietnam_history',
       'dbTopic': 'History & Culture',
-      'questions': '12 Câu hỏi',
+      'questions': '8 Câu hỏi',
       'tag': 'Hồi hộp',
       'icon': Icons.hourglass_bottom,
       'color': const Color(0xFF8D6E63), // Brown
@@ -59,6 +62,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
     },
     {
       'title': 'Thế Giới Tự Nhiên',
+      'systemQuizId': 'system_nature_world',
       'dbTopic': 'Geography & Nature',
       'questions': '6 Câu hỏi',
       'tag': 'Thú vị',
@@ -183,6 +187,38 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
     }
   }
 
+  void _showUpgradeAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.workspace_premium_rounded, color: Colors.amber, size: 28),
+            SizedBox(width: 10),
+            Text(
+              'Nâng Cấp Tài Khoản',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Bạn phải nâng cấp tài khoản để tạo phòng game',
+          style: TextStyle(fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'Đóng',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _startPracticeRoomWithQuiz(
     QuizSet quiz,
     ColorScheme colors,
@@ -198,12 +234,12 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
     try {
       final createVm = context.read<CreateRoomViewModel>();
       createVm.selectQuiz(quiz.id, quiz.title);
-      createVm.toggleIsPublic(true);
+      createVm.toggleIsPublic(false);
       final room = await createVm.createRoom(hostId);
 
       if (mounted) {
         if (room != null) {
-          context.go('/lobby/${room.id}');
+          context.go('/quiz/${room.id}');
         } else {
           setState(() => _isActionLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -229,7 +265,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
     }
   }
 
-  Future<void> _startPracticeRoom(String topic, ColorScheme colors) async {
+  Future<void> _startPracticeRoom(Map<String, dynamic> topicData, ColorScheme colors) async {
     final authVm = context.read<AuthViewModel>();
     final user = authVm.currentUser;
 
@@ -240,13 +276,20 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
 
     try {
       final createVm = context.read<CreateRoomViewModel>();
-      createVm.setTopic(topic);
-      createVm.toggleIsPublic(true);
+      final title = topicData['title'] as String? ?? 'Sử Việt Hào Hùng';
+      final systemQuizId = topicData['systemQuizId'] as String?;
+
+      if (systemQuizId != null && systemQuizId.isNotEmpty) {
+        createVm.selectQuiz(systemQuizId, title);
+      } else {
+        createVm.setTopic(title);
+      }
+      createVm.toggleIsPublic(false);
       final room = await createVm.createRoom(hostId);
 
       if (mounted) {
         if (room != null) {
-          context.go('/lobby/${room.id}');
+          context.go('/quiz/${room.id}');
         } else {
           setState(() => _isActionLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -315,44 +358,46 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
                   ],
                 ),
                 const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Xin chào,',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.normal,
-                        color: AppColors.onSurfaceVariant.withValues(
-                          alpha: 0.6,
-                        ),
-                      ),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            displayName,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Xin chào,',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal,
+                          color: AppColors.onSurfaceVariant.withValues(
+                            alpha: 0.6,
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          Icons.edit_outlined,
-                          size: 13,
-                          color: AppColors.primary.withValues(alpha: 0.5),
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              displayName,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.edit_outlined,
+                            size: 13,
+                            color: AppColors.primary.withValues(alpha: 0.5),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -914,7 +959,15 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
                               ),
                               const SizedBox(height: 20),
                               ElevatedButton.icon(
-                                onPressed: () => context.push('/create-room'),
+                                onPressed: () {
+                                  final authVm = context.read<AuthViewModel>();
+                                  final email = authVm.currentUser?.email;
+                                  if (email != null && email.trim().toLowerCase() == 'll.stylish73@gmail.com') {
+                                    context.push('/create-room');
+                                  } else {
+                                    _showUpgradeAccountDialog(context);
+                                  }
+                                },
                                 icon: const Icon(Icons.add),
                                 label: const Text(
                                   'TẠO PHÒNG GAME',
@@ -1270,7 +1323,7 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
 
   Widget _buildTopicCard(Map<String, dynamic> topic, ColorScheme colors) {
     return GestureDetector(
-      onTap: () => _startPracticeRoom(topic['dbTopic'], colors),
+      onTap: () => _startPracticeRoom(topic, colors),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(

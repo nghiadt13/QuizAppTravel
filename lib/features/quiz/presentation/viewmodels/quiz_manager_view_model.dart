@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/system_quiz_presets.dart';
 import '../../../../core/errors/app_exception.dart';
@@ -277,5 +278,20 @@ class QuizManagerViewModel extends ChangeNotifier {
       }
     }
     return merged;
+  }
+
+  Future<String?> uploadQuizCover(Uint8List imageBytes, String userId) async {
+    try {
+      final downloadUrl = await _service.uploadQuizCover(imageBytes, userId);
+      return downloadUrl;
+    } on AppException catch (e) {
+      _errorMessage = e.message;
+      notifyListeners();
+      return null;
+    } catch (e) {
+      _errorMessage = 'Không thể tải ảnh lên.';
+      notifyListeners();
+      return null;
+    }
   }
 }

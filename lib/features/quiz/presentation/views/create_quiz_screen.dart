@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../auth/presentation/viewmodels/auth_view_model.dart';
 import '../../../quiz_game/domain/entities/quiz_question.dart';
 import '../viewmodels/quiz_manager_view_model.dart';
 
@@ -15,44 +17,26 @@ class CreateQuizScreen extends StatefulWidget {
 
 class _CreateQuizScreenState extends State<CreateQuizScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _imagePicker = ImagePicker();
   late final TextEditingController _titleController;
   late final TextEditingController _descController;
   String _selectedCover = '';
-  bool _isPublic = true;
-
-  final List<Map<String, String>> _presetCovers = const [
-    {
-      'name': 'Hạ Long ⛵',
-      'url': 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80',
-    },
-    {
-      'name': 'Sapa 🌾',
-      'url': 'https://images.unsplash.com/photo-1509060464153-44667396260f?auto=format&fit=crop&w=600&q=80',
-    },
-    {
-      'name': 'Hội An 🏮',
-      'url': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
-    },
-    {
-      'name': 'Biển Nha Trang 🏖️',
-      'url': 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
-    },
-    {
-      'name': 'Khám phá 🧭',
-      'url': 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=600&q=80',
-    },
-  ];
+  bool _isPublic = false;
+  bool _isUploading = false;
 
   @override
   void initState() {
     super.initState();
     final vm = context.read<QuizManagerViewModel>();
+    final authVm = context.read<AuthViewModel>();
     final editing = vm.editingQuiz;
+    final userEmail = authVm.currentUser?.email;
+    final isAdmin = userEmail != null && userEmail.trim().toLowerCase() == 'll.stylish73@gmail.com';
 
     _titleController = TextEditingController(text: editing?.title ?? '');
     _descController = TextEditingController(text: editing?.description ?? '');
-    _selectedCover = editing?.imageUrl ?? _presetCovers.first['url']!;
-    _isPublic = editing?.isPublic ?? true;
+    _selectedCover = editing?.imageUrl ?? '';
+    _isPublic = isAdmin ? (editing?.isPublic ?? false) : false;
   }
 
   @override
@@ -62,15 +46,71 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
     super.dispose();
   }
 
+  Future<void> _pickAndUploadImage() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1200,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+
+      if (image == null || !mounted) return;
+
+      // Get references before async operations
+      final authVm = context.read<AuthViewModel>();
+      final vm = context.read<QuizManagerViewModel>();
+      final userId = authVm.currentUser?.uid ?? 'guest';
+
+      setState(() => _isUploading = true);
+
+      // Read image bytes (works on both web and mobile)
+      final imageBytes = await image.readAsBytes();
+
+      final downloadUrl = await vm.uploadQuizCover(imageBytes, userId);
+
+      if (mounted && downloadUrl != null) {
+        setState(() {
+          _selectedCover = downloadUrl;
+          _isUploading = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tải ảnh lên thành công! ✅'),
+              backgroundColor: AppColors.tertiaryContainer,
+            ),
+          );
+        }
+      } else if (mounted) {
+        setState(() => _isUploading = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isUploading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi chọn ảnh: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _onSave() async {
     if (!_formKey.currentState!.validate()) return;
+
+    final authVm = context.read<AuthViewModel>();
+    final userEmail = authVm.currentUser?.email;
+    final isAdmin = userEmail != null && userEmail.trim().toLowerCase() == 'll.stylish73@gmail.com';
 
     final vm = context.read<QuizManagerViewModel>();
     vm.updateQuizDetails(
       title: _titleController.text,
       description: _descController.text,
       imageUrl: _selectedCover,
-      isPublic: _isPublic,
+      isPublic: isAdmin ? _isPublic : false,
     );
 
     final success = await vm.saveQuiz();
@@ -178,114 +218,145 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            SizedBox(
-                              height: 100,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: _presetCovers.length,
-                                itemBuilder: (context, index) {
-                                  final item = _presetCovers[index];
-                                  final isSelected = item['url'] == _selectedCover;
-
-                                  return GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        _selectedCover = item['url']!;
-                                      });
-                                    },
+                            _selectedCover.isEmpty
+                                ? GestureDetector(
+                                    onTap: _isUploading ? null : _pickAndUploadImage,
                                     child: Container(
-                                      width: 130,
-                                      margin: const EdgeInsets.only(right: 12),
+                                      height: 110,
+                                      width: double.infinity,
                                       decoration: BoxDecoration(
+                                        color: AppColors.primary.withValues(alpha: 0.04),
                                         borderRadius: BorderRadius.circular(16),
                                         border: Border.all(
-                                          color: isSelected ? AppColors.secondary : Colors.transparent,
-                                          width: 3,
-                                        ),
-                                        image: DecorationImage(
-                                          image: NetworkImage(item['url']!),
-                                          fit: BoxFit.cover,
-                                          colorFilter: ColorFilter.mode(
-                                            Colors.black.withValues(alpha: 0.3),
-                                            BlendMode.darken,
-                                          ),
+                                          color: AppColors.primary.withValues(alpha: 0.25),
+                                          width: 1.5,
                                         ),
                                       ),
                                       alignment: Alignment.center,
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          Text(
-                                            item['name']!,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          if (isSelected)
-                                            const Positioned(
-                                              top: 4,
-                                              right: 4,
-                                              child: Icon(
-                                                Icons.check_circle,
-                                                color: AppColors.secondary,
-                                                size: 18,
+                                      child: _isUploading
+                                          ? const Center(
+                                              child: CircularProgressIndicator(
+                                                color: AppColors.primary,
                                               ),
+                                            )
+                                          : const Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.cloud_upload_outlined,
+                                                  color: AppColors.primary,
+                                                  size: 34,
+                                                ),
+                                                SizedBox(height: 6),
+                                                Text(
+                                                  'Tải ảnh bìa từ thiết bị lên',
+                                                  style: TextStyle(
+                                                    color: AppColors.primary,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 13,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                        ],
+                                    ),
+                                  )
+                                : Container(
+                                    height: 140,
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      image: DecorationImage(
+                                        image: NetworkImage(_selectedCover),
+                                        fit: BoxFit.cover,
+                                      ),
+                                      border: Border.all(
+                                        color: AppColors.primary.withValues(alpha: 0.2),
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-
-                            // Section 3: Public switch
-                            Card(
-                              elevation: 0,
-                              color: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                side: const BorderSide(color: AppColors.outlineVariant),
-                              ),
-                              child: SwitchListTile(
-                                title: const Text(
-                                  'Công Khai Bộ Câu Hỏi',
-                                  style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
-                                ),
-                                subtitle: const Text(
-                                  'Cho phép chủ phòng khác chọn bộ câu hỏi này để mở lobby.',
-                                  style: TextStyle(fontSize: 12, color: Colors.black54),
-                                ),
-                                value: _isPublic,
-                                onChanged: (val) {
-                                  setState(() {
-                                    _isPublic = val;
-                                  });
-                                },
-                              ),
-                            ),
+                                    child: Stack(
+                                      children: [
+                                        Positioned(
+                                          top: 8,
+                                          right: 8,
+                                          child: Container(
+                                            decoration: const BoxDecoration(
+                                              color: Colors.black54,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: IconButton(
+                                              icon: const Icon(
+                                                Icons.close,
+                                                color: Colors.white,
+                                                size: 18,
+                                              ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  _selectedCover = '';
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          bottom: 8,
+                                          left: 8,
+                                          child: ElevatedButton.icon(
+                                            onPressed: _isUploading
+                                                ? null
+                                                : _pickAndUploadImage,
+                                            icon: const Icon(
+                                              Icons.photo_library_outlined,
+                                              size: 16,
+                                            ),
+                                            label: const Text(
+                                              'Thay đổi ảnh bìa',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  Colors.white.withValues(alpha: 0.9),
+                                              foregroundColor: AppColors.primary,
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 8,
+                                              ),
+                                              elevation: 2,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                             const SizedBox(height: 32),
 
                             // Section 4: Questions List Header
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  'DANH SÁCH CÂU HỎI (${vm.editingQuestions.length})',
-                                  style: AppTextStyles.labelMedium.copyWith(
-                                    color: AppColors.primary,
-                                    letterSpacing: 1.2,
-                                    fontWeight: FontWeight.bold,
+                                Expanded(
+                                  child: Text(
+                                    'CÂU HỎI (${vm.editingQuestions.length})',
+                                    style: AppTextStyles.labelMedium.copyWith(
+                                      color: AppColors.primary,
+                                      letterSpacing: 0.8,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                                 TextButton.icon(
                                   onPressed: vm.addQuestion,
-                                  icon: const Icon(Icons.add_circle_outline, size: 18),
-                                  label: const Text('Thêm Câu Hỏi', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  icon: const Icon(Icons.add_circle_outline, size: 16),
+                                  label: const Text('Thêm', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                  style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  ),
                                 ),
                               ],
                             ),

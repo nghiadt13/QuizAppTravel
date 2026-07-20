@@ -32,12 +32,18 @@ class _QuizDetailScreenState extends State<QuizDetailScreen> {
     try {
       final createVm = context.read<CreateRoomViewModel>();
       createVm.selectQuiz(widget.quiz.id, widget.quiz.title);
-      createVm.toggleIsPublic(!isSolo);
+      final userEmail = user?.email;
+      final isUserAdmin = userEmail != null && userEmail.trim().toLowerCase() == 'll.stylish73@gmail.com';
+      createVm.toggleIsPublic(!isSolo && isUserAdmin);
       final room = await createVm.createRoom(hostId);
 
       if (mounted) {
         if (room != null) {
-          context.go('/lobby/${room.id}');
+          if (isSolo) {
+            context.go('/quiz/${room.id}');
+          } else {
+            context.go('/lobby/${room.id}');
+          }
         } else {
           setState(() => _isCreatingRoom = false);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -325,51 +331,88 @@ class _QuizDetailScreenState extends State<QuizDetailScreen> {
               ),
               child: SafeArea(
                 top: false,
-                child: Row(
-                  children: [
-                    // Solo Practice Button
-                    Expanded(
-                      flex: 1,
-                      child: OutlinedButton.icon(
-                        onPressed: _isCreatingRoom ? null : () => _startRoom(true),
-                        icon: const Icon(Icons.person, size: 18),
-                        label: const Text(
-                          'Tự Luyện Solo',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          side: const BorderSide(color: AppColors.primary, width: 1.5),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                child: Builder(
+                  builder: (context) {
+                    final authVm = context.watch<AuthViewModel>();
+                    final userEmail = authVm.currentUser?.email;
+                    final isAdmin = userEmail != null &&
+                        userEmail.trim().toLowerCase() == 'll.stylish73@gmail.com';
+
+                    if (!isAdmin) {
+                      return SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _isCreatingRoom ? null : () => _startRoom(true),
+                          icon: const Icon(Icons.rocket_launch_rounded, size: 20),
+                          label: const Text(
+                            'BẮT ĐẦU LUYỆN TẬP',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.secondaryContainer,
+                            foregroundColor: AppColors.onSecondaryContainer,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Host Room Button
-                    Expanded(
-                      flex: 2,
-                      child: ElevatedButton.icon(
-                        onPressed: _isCreatingRoom ? null : () => _startRoom(false),
-                        icon: const Icon(Icons.groups, size: 20),
-                        label: const Text(
-                          'Tạo Phòng Thi Đấu',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                      );
+                    }
+
+                    return Row(
+                      children: [
+                        // Solo Practice Button
+                        Expanded(
+                          flex: 1,
+                          child: OutlinedButton.icon(
+                            onPressed: _isCreatingRoom ? null : () => _startRoom(true),
+                            icon: const Icon(Icons.person, size: 18),
+                            label: const Text(
+                              'Bắt Đầu Luyện Tập',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              textAlign: TextAlign.center,
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              side: const BorderSide(color: AppColors.primary, width: 1.5),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
+                        const SizedBox(width: 12),
+                        // Host Room Button
+                        Expanded(
+                          flex: 2,
+                          child: ElevatedButton.icon(
+                            onPressed: _isCreatingRoom ? null : () => _startRoom(false),
+                            icon: const Icon(Icons.groups, size: 20),
+                            label: const Text(
+                              'Tạo Phòng Thi Đấu',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),

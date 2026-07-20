@@ -20,4 +20,6 @@ abstract interface class IQuestRoomRepository {
   Future<List<PresetAvatar>> fetchPresetAvatars();
   Future<List<QuestRoom>> fetchActivePublicRooms();
   Future<List<QuestRoom>> getRoomsByHost(String hostId);
+  Future<List<QuestRoom>> fetchAllRooms({int limit = 30});
+  Future<List<Participant>> getParticipants(String roomId);
 }

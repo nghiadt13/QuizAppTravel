@@ -30,11 +30,43 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
     });
   }
 
+  void _showUpgradeAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.workspace_premium_rounded, color: Colors.amber, size: 28),
+            SizedBox(width: 10),
+            Text(
+              'Nâng Cấp Tài Khoản',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Bạn phải nâng cấp tài khoản để tạo phòng game',
+          style: TextStyle(fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'Đóng',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _onCreateRoom() async {
     final authVm = context.read<AuthViewModel>();
-    final hostId = authVm.currentUser?.uid;
+    final user = authVm.currentUser;
 
-    if (hostId == null) {
+    if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Chủ phòng chưa đăng nhập. Vui lòng đăng nhập trước.'),
@@ -45,6 +77,12 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
     }
 
     final createVm = context.read<CreateRoomViewModel>();
+    final email = user.email.trim().toLowerCase();
+    if (email != 'll.stylish73@gmail.com') {
+      _showUpgradeAccountDialog(context);
+      return;
+    }
+
     if (createVm.selectedQuizId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -55,7 +93,8 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
       return;
     }
 
-    final room = await createVm.createRoom(hostId);
+    createVm.toggleIsPublic(true);
+    final room = await createVm.createRoom(user.uid);
     if (room != null && mounted) {
       context.replace('/lobby/${room.id}');
     }
@@ -135,11 +174,6 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                         quizzes: quizVm.publicQuizzes,
                         selectedQuizId: createVm.selectedQuizId,
                         onSelect: createVm.selectQuiz,
-                      ),
-                      const SizedBox(height: 24),
-                      _PublicRoomSwitch(
-                        value: createVm.isPublic,
-                        onChanged: createVm.toggleIsPublic,
                       ),
                       const SizedBox(height: 22),
                       if (createVm.errorMessage != null) ...[
@@ -441,7 +475,7 @@ class _ResponsiveQuizGrid extends StatelessWidget {
             : width < 860
             ? 2
             : 3;
-        final tileHeight = width < 520 ? 172.0 : 190.0;
+        final tileHeight = width < 520 ? 200.0 : 210.0;
 
         return GridView.builder(
           shrinkWrap: true,
@@ -590,17 +624,17 @@ class _QuizChoiceCard extends StatelessWidget {
                       fontSize: 18,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     quiz.description,
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.labelSmall.copyWith(
                       color: Colors.white.withValues(alpha: 0.82),
                       height: 1.25,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       _QuizMetaPill(
@@ -719,53 +753,61 @@ class _EmptyPersonalQuizCard extends StatelessWidget {
           color: AppColors.secondaryContainer.withValues(alpha: 0.28),
         ),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.secondaryContainer.withValues(alpha: 0.22),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.edit_note_rounded,
-              color: AppColors.primary,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Bạn chưa có bộ câu hỏi tự tạo.',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w900,
-                  ),
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryContainer.withValues(alpha: 0.22),
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  'Có thể dùng bộ hệ thống bên dưới hoặc tạo bộ riêng cho nhóm.',
-                  style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.onSurfaceVariant,
-                  ),
+                child: const Icon(
+                  Icons.edit_note_rounded,
+                  color: AppColors.primary,
+                  size: 28,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Chưa có bộ câu hỏi nào.',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Dùng bộ hệ thống hoặc tạo bộ riêng.',
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          OutlinedButton.icon(
-            onPressed: onCreateQuiz,
-            icon: const Icon(Icons.add_rounded, size: 18),
-            label: const Text('Tạo mới'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              side: const BorderSide(color: AppColors.primary),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onCreateQuiz,
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Tạo bộ câu hỏi mới'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                side: const BorderSide(color: AppColors.primary),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
             ),
           ),
@@ -775,49 +817,6 @@ class _EmptyPersonalQuizCard extends StatelessWidget {
   }
 }
 
-class _PublicRoomSwitch extends StatelessWidget {
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  const _PublicRoomSwitch({required this.value, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.outlineVariant),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.035),
-            blurRadius: 14,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: SwitchListTile(
-        title: Text(
-          'Phòng Công Khai',
-          style: AppTextStyles.bodyMedium.copyWith(
-            fontWeight: FontWeight.w900,
-            color: AppColors.primary,
-          ),
-        ),
-        subtitle: Text(
-          'Người chơi khác có thể thấy và tham gia phòng từ danh sách công khai.',
-          style: AppTextStyles.labelSmall.copyWith(
-            color: AppColors.onSurfaceVariant,
-          ),
-        ),
-        value: value,
-        onChanged: onChanged,
-        activeThumbColor: AppColors.tertiaryContainer,
-        inactiveTrackColor: AppColors.surfaceVariant,
-      ),
-    );
-  }
-}
 
 class _SectionTitle extends StatelessWidget {
   final String title;

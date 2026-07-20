@@ -114,12 +114,12 @@ class _AllTopicsScreenState extends State<AllTopicsScreen> {
     try {
       final createVm = context.read<CreateRoomViewModel>();
       createVm.selectQuiz(quiz.id, quiz.title);
-      createVm.toggleIsPublic(true);
+      createVm.toggleIsPublic(false);
       final room = await createVm.createRoom(hostId);
 
       if (mounted) {
         if (room != null) {
-          context.go('/lobby/${room.id}');
+          context.go('/quiz/${room.id}');
         } else {
           setState(() => _isActionLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -156,12 +156,12 @@ class _AllTopicsScreenState extends State<AllTopicsScreen> {
     try {
       final createVm = context.read<CreateRoomViewModel>();
       createVm.setTopic(topic);
-      createVm.toggleIsPublic(true);
+      createVm.toggleIsPublic(false);
       final room = await createVm.createRoom(hostId);
 
       if (mounted) {
         if (room != null) {
-          context.go('/lobby/${room.id}');
+          context.go('/quiz/${room.id}');
         } else {
           setState(() => _isActionLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(

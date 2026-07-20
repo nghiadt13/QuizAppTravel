@@ -7,6 +7,7 @@ import '../../features/home/presentation/views/leaderboard_tab_screen.dart';
 import '../../features/home/presentation/views/profile_tab_screen.dart';
 import '../../features/home/presentation/views/quests_tab_screen.dart';
 import '../../features/home/presentation/views/shop_tab_screen.dart';
+import '../../features/home/presentation/views/history_tab_screen.dart';
 import '../../features/live_monitoring/presentation/views/host_control_screen.dart';
 import '../../features/quest_room/presentation/views/player_setup_screen.dart';
 import '../../features/quest_room/presentation/views/create_room_screen.dart';
@@ -61,8 +62,16 @@ class AppRouter {
             builder: (context, state) => const ShopTabScreen(),
           ),
           GoRoute(
+            path: '/home/history',
+            builder: (context, state) => const HistoryTabScreen(),
+          ),
+          GoRoute(
             path: '/home/profile',
             builder: (context, state) => const ProfileTabScreen(),
+          ),
+          GoRoute(
+            path: '/home/all-topics',
+            builder: (context, state) => const AllTopicsScreen(),
           ),
         ],
       ),

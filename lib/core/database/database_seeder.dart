@@ -2,6 +2,23 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 class DatabaseSeeder {
+  static Future<void> clearOldRooms() async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final snapshot = await firestore.collection('rooms').get();
+      for (final doc in snapshot.docs) {
+        final participants = await doc.reference.collection('participants').get();
+        for (final p in participants.docs) {
+          await p.reference.delete();
+        }
+        await doc.reference.delete();
+      }
+      debugPrint('Cleared all old room documents from Firestore!');
+    } catch (e) {
+      debugPrint('Error clearing old rooms: $e');
+    }
+  }
+
   static Future<void> seedQuizzesIfEmpty() async {
     try {
       final firestore = FirebaseFirestore.instance;

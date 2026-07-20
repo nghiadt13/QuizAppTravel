@@ -11,7 +11,7 @@ class CreateRoomViewModel extends ChangeNotifier {
   String _topic = '';
   String get topic => _topic;
 
-  bool _isPublic = true;
+  bool _isPublic = false;
   bool get isPublic => _isPublic;
 
   bool _isLoading = false;

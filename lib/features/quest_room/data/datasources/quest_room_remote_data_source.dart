@@ -20,6 +20,8 @@ abstract interface class IQuestRoomRemoteDataSource {
   Future<void> deleteRoom(String roomId);
   Future<List<QuestRoomDto>> fetchActivePublicRooms();
   Future<List<QuestRoomDto>> fetchRoomsByHost(String hostId);
+  Future<List<QuestRoomDto>> fetchAllRooms({int limit = 30});
+  Future<List<ParticipantDto>> fetchParticipants(String roomId);
 }
 
 class QuestRoomRemoteDataSourceImpl implements IQuestRoomRemoteDataSource {
@@ -197,6 +199,46 @@ class QuestRoomRemoteDataSourceImpl implements IQuestRoomRemoteDataSource {
       throw AppException(e.message ?? 'Failed to delete room.', code: e.code);
     } catch (e) {
       throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<QuestRoomDto>> fetchAllRooms({int limit = 30}) async {
+    try {
+      final snapshot = await _firestore
+          .collection('rooms')
+          .get();
+
+      final list = snapshot.docs
+          .map((doc) => QuestRoomDto.fromFirestore(doc.data(), doc.id))
+          .toList();
+
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      if (list.length > limit) {
+        return list.sublist(0, limit);
+      }
+      return list;
+    } on FirebaseException catch (e) {
+      throw AppException(e.message ?? 'Failed to fetch all rooms.', code: e.code);
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<ParticipantDto>> fetchParticipants(String roomId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('rooms')
+          .doc(roomId)
+          .collection('participants')
+          .get();
+
+      return snapshot.docs
+          .map((doc) => ParticipantDto.fromFirestore(doc.data(), doc.id))
+          .toList();
+    } catch (_) {
+      return [];
     }
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../router/app_router.dart';
+import '../services/cloudinary_service.dart';
 
 // Auth Feature imports
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
@@ -84,6 +85,7 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
+  getIt.registerLazySingleton<CloudinaryService>(() => CloudinaryService());
 
   // GoogleSignIn SDK: only initialize on non-web platforms.
   // On web, auth uses Firebase signInWithPopup directly (see auth_remote_data_source.dart).
@@ -153,7 +155,7 @@ Future<void> setupDependencies() async {
     () => QuizServiceImpl(getIt()),
   );
   getIt.registerLazySingleton<IQuizManagerService>(
-    () => QuizManagerServiceImpl(getIt()),
+    () => QuizManagerServiceImpl(getIt(), getIt<CloudinaryService>()),
   );
 
   // ViewModels

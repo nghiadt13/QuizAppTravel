@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/widgets/app_avatar.dart';
 import '../../../auth/presentation/viewmodels/auth_view_model.dart';
 import '../../presentation/viewmodels/quiz_play_view_model.dart';
 import '../../presentation/widgets/countdown_timer.dart';
@@ -12,10 +12,6 @@ import '../../presentation/widgets/answer_option_tile.dart';
 import '../../presentation/widgets/feedback_toast.dart';
 import '../../presentation/widgets/hint_button.dart';
 import '../../../../features/quest_room/presentation/viewmodels/player_setup_view_model.dart';
-import '../../../../core/di/di.dart';
-import '../../../../features/quest_room/application/services/i_quest_room_service.dart';
-import '../../../../features/quest_room/domain/entities/participant.dart';
-import '../../../../features/leaderboard/application/services/i_leaderboard_service.dart';
 
 class QuizPlayScreen extends StatefulWidget {
   final String roomId;
@@ -27,6 +23,28 @@ class QuizPlayScreen extends StatefulWidget {
 }
 
 class _QuizPlayScreenState extends State<QuizPlayScreen> {
+  bool _hasSavedHistory = false;
+
+  void _saveQuizHistory(QuizPlayViewModel quizVm, String userId) {
+    if (_hasSavedHistory) return;
+    _hasSavedHistory = true;
+
+    try {
+      final quizTitle = quizVm.roomTopic.isNotEmpty
+          ? quizVm.roomTopic
+          : 'Sử Việt Hào Hùng';
+
+      FirebaseFirestore.instance.collection('quiz_history').add({
+        'userId': userId,
+        'quizTitle': quizTitle,
+        'quizId': quizVm.quizId ?? '',
+        'score': quizVm.score,
+        'correctCount': quizVm.correctAnswersCount,
+        'totalQuestions': quizVm.questions.length,
+        'completedAt': DateTime.now(),
+      });
+    } catch (_) {}
+  }
   @override
   void initState() {
     super.initState();
@@ -45,10 +63,6 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
   @override
   Widget build(BuildContext context) {
     final quizVm = context.watch<QuizPlayViewModel>();
-    final authVm = context.watch<AuthViewModel>();
-    final playerSetupVm = context.watch<PlayerSetupViewModel>();
-    final userId =
-        playerSetupVm.playerId ?? authVm.currentUser?.uid ?? 'anonymous';
 
     if (quizVm.isLoading) {
       return const Scaffold(
@@ -122,6 +136,11 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
 
     // Game Finished Summary View
     if (quizVm.isFinished) {
+      final authVm = context.read<AuthViewModel>();
+      final playerSetupVm = context.read<PlayerSetupViewModel>();
+      final userId = authVm.currentUser?.uid ?? playerSetupVm.playerId ?? '';
+      _saveQuizHistory(quizVm, userId);
+
       return Scaffold(
         backgroundColor: AppColors.background,
         body: SafeArea(
@@ -200,218 +219,122 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // Live room scoreboard section
+                // Quiz performance summary cards (Correct vs Incorrect)
                 Row(
                   children: [
-                    const Icon(
-                      Icons.analytics_outlined,
-                      color: AppColors.primary,
-                      size: 20,
+                    // Correct answers card
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 20,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0FDF4),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: const Color(0xFF22C55E).withValues(alpha: 0.3),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF22C55E),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check_rounded,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'SỐ CÂU ĐÚNG',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF15803D),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${quizVm.correctAnswersCount}',
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF15803D),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'BẢNG XẾP HẠNG PHÒNG GAME',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                        letterSpacing: 0.5,
+                    const SizedBox(width: 16),
+                    // Incorrect answers card
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 20,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF2F2),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: const Color(0xFFEF4444).withValues(alpha: 0.3),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFEF4444),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.close_rounded,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'SỐ CÂU SAI',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFB91C1C),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${quizVm.incorrectAnswersCount}',
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFFB91C1C),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 12),
-
-                StreamBuilder<List<Participant>>(
-                  stream: getIt<IQuestRoomService>().watchParticipants(
-                    widget.roomId,
-                  ),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 20),
-                        child: Text(
-                          'Không thể tải bảng điểm thời gian thực.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.red, fontSize: 13),
-                        ),
-                      );
-                    }
-                    if (!snapshot.hasData) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 20),
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    }
-
-                    final participants = List<Participant>.from(snapshot.data!);
-                    // Sort participants by score descending, then by joinedAt
-                    participants.sort((a, b) {
-                      final scoreComparison = b.score.compareTo(a.score);
-                      if (scoreComparison != 0) return scoreComparison;
-                      return a.joinedAt.compareTo(b.joinedAt);
-                    });
-
-                    return Card(
-                      elevation: 0,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(
-                          color: AppColors.primary.withValues(alpha: 0.08),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: participants.length,
-                          separatorBuilder: (context, index) => Divider(
-                            color: AppColors.primary.withValues(alpha: 0.05),
-                            height: 1,
-                          ),
-                          itemBuilder: (context, index) {
-                            final p = participants[index];
-                            final isMe = p.playerId == userId;
-                            final rank = index + 1;
-
-                            Widget rankWidget;
-                            if (rank == 1) {
-                              rankWidget = const Text(
-                                '🥇',
-                                style: TextStyle(fontSize: 20),
-                              );
-                            } else if (rank == 2) {
-                              rankWidget = const Text(
-                                '🥈',
-                                style: TextStyle(fontSize: 20),
-                              );
-                            } else if (rank == 3) {
-                              rankWidget = const Text(
-                                '🥉',
-                                style: TextStyle(fontSize: 20),
-                              );
-                            } else {
-                              rankWidget = Container(
-                                width: 24,
-                                height: 24,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.05,
-                                  ),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Text(
-                                  '$rank',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primary.withValues(
-                                      alpha: 0.6,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-
-                            return Container(
-                              color: isMe
-                                  ? AppColors.primary.withValues(alpha: 0.03)
-                                  : Colors.transparent,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                                vertical: 12.0,
-                              ),
-                              child: Row(
-                                children: [
-                                  rankWidget,
-                                  const SizedBox(width: 12),
-                                  AppAvatar(
-                                    avatarUrl: p.avatarId,
-                                    displayName: p.displayName,
-                                    radius: 16,
-                                  ),
-                                  const SizedBox(width: 12),
-
-                                  Expanded(
-                                    child: Text(
-                                      p.displayName + (isMe ? ' (Bạn)' : ''),
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: isMe
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                        color: isMe
-                                            ? AppColors.primary
-                                            : AppColors.onSurface,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        '${p.score} pts',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: isMe
-                                              ? AppColors.secondary
-                                              : AppColors.primary,
-                                        ),
-                                      ),
-                                      if (p.status == ParticipantStatus.playing)
-                                        Text(
-                                          'Đang trả lời...',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            color: AppColors.onSurfaceVariant
-                                                .withValues(alpha: 0.6),
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                  },
                 ),
                 const SizedBox(height: 32),
 
                 // Finish Game & Back to Home Button
                 ElevatedButton.icon(
-                  onPressed: () async {
-                    final score = quizVm.score;
-                    final router = GoRouter.of(context);
-                    if (userId.isNotEmpty && userId != 'anonymous') {
-                      try {
-                        final displayName =
-                            playerSetupVm.displayName ??
-                            authVm.currentUser?.displayName ??
-                            'Người chơi';
-                        final avatarUrl =
-                            playerSetupVm.avatarId ??
-                            authVm.currentUser?.avatarUrl;
-                        await getIt<ILeaderboardService>().submitGameScore(
-                          'all-time',
-                          userId,
-                          score,
-                          displayName: displayName,
-                          avatarUrl: avatarUrl,
-                        );
-                      } catch (_) {}
-                    }
-                    router.go('/home/quests');
+                  onPressed: () {
+                    context.go('/home/quests');
                   },
                   icon: const Icon(Icons.home_rounded, size: 22),
                   style: ElevatedButton.styleFrom(
@@ -453,7 +376,10 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        automaticallyImplyLeading: false, // Prevent going back mid-game
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: AppColors.primary),
+          onPressed: () => context.pop(),
+        ),
         actions: [
           // Score Badge in AppBar
           Container(
@@ -603,24 +529,20 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
               ),
 
             // Animated points / feedback toast at bottom
-            Positioned(
-              bottom: 90,
-              left: 0,
-              right: 0,
-              child: FeedbackToast(
-                message: quizVm.feedbackMessage ?? '',
-                isCorrect: isCorrect,
-                visible: quizVm.feedbackMessage != null,
+            if (quizVm.feedbackMessage != null && quizVm.feedbackMessage!.isNotEmpty)
+              Positioned(
+                bottom: 90,
+                left: 0,
+                right: 0,
+                child: FeedbackToast(
+                  message: quizVm.feedbackMessage!,
+                  isCorrect: isCorrect,
+                  visible: true,
+                ),
               ),
-            ),
           ],
         ),
       ),
     );
-  }
-
-  String _getCurrentPeriod() {
-    final now = DateTime.now();
-    return '${now.year}-${now.month.toString().padLeft(2, '0')}';
   }
 }

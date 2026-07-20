@@ -138,69 +138,72 @@ class _RoomCodeDisplayState extends State<RoomCodeDisplay>
                       ),
                       const SizedBox(height: 16),
                       // PIN Display
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // PIN digits with spacing
-                          ...List.generate(widget.pinCode.length, (index) {
-                            final digit = widget.pinCode[index];
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // PIN digits with spacing
+                            ...List.generate(widget.pinCode.length, (index) {
+                              final digit = widget.pinCode[index];
 
-                            return Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Add gap between groups (3 + 3)
-                                if (index == 3) const SizedBox(width: 16),
-                                AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  width: 36,
-                                  height: 44,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: Colors.white.withValues(alpha: 0.2),
-                                      width: 1,
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Add gap between groups (3 + 3)
+                                  if (index == 3) const SizedBox(width: 10),
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    width: 32,
+                                    height: 42,
+                                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: Colors.white.withValues(alpha: 0.2),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      digit,
+                                      style: AppTextStyles.headlineMedium.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 22,
+                                      ),
                                     ),
                                   ),
-                                  child: Text(
-                                    digit,
-                                    style: AppTextStyles.headlineMedium.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 24,
-                                      letterSpacing: 2,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          }),
-                          const SizedBox(width: 16),
-                          // Copy button
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            child: Material(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(12),
-                              child: InkWell(
-                                onTap: () => _copyToClipboard(context),
+                                ],
+                              );
+                            }),
+                            const SizedBox(width: 10),
+                            // Copy button
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              child: Material(
+                                color: Colors.white.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: const Icon(
-                                    Icons.copy_rounded,
-                                    color: Colors.white,
-                                    size: 22,
+                                child: InkWell(
+                                  onTap: () => _copyToClipboard(context),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(9),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(
+                                      Icons.copy_rounded,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 12),
                       // Share hint

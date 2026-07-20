@@ -63,6 +63,10 @@ class _FeedbackToastState extends State<FeedbackToast>
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.visible || widget.message.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     final themeColor = widget.isCorrect ? const Color(0xFF4CAF50) : AppColors.error;
     final icon = widget.isCorrect ? Icons.check_circle : Icons.cancel;
 

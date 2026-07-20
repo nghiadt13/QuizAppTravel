@@ -303,35 +303,43 @@ class _LobbyScreenState extends State<LobbyScreen>
               }
             },
           ),
-          const Spacer(),
+          const SizedBox(width: 4),
           // Title with icon
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primary, AppColors.primaryContainer],
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, AppColors.primaryContainer],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  borderRadius: BorderRadius.circular(8),
+                  child: const Icon(
+                    Icons.explore_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.explore_rounded,
-                  color: Colors.white,
-                  size: 18,
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    'Phòng Chờ Game',
+                    style: AppTextStyles.headlineMedium.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Phòng Chờ Game',
-                style: AppTextStyles.headlineMedium.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const Spacer(),
+          const SizedBox(width: 4),
           // Room status indicator
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

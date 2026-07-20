@@ -18,7 +18,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
     if (location.startsWith('/home/leaderboard')) {
       return 1;
     }
-    if (location.startsWith('/home/shop')) {
+    if (location.startsWith('/home/history')) {
       return 2;
     }
     if (location.startsWith('/home/profile')) {
@@ -36,7 +36,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
         context.go('/home/leaderboard');
         break;
       case 2:
-        context.go('/home/shop');
+        context.go('/home/history');
         break;
       case 3:
         context.go('/home/profile');
@@ -89,9 +89,9 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                 _buildNavItem(
                   index: 2,
                   selectedIndex: selectedIndex,
-                  activeIcon: Icons.card_giftcard,
-                  inactiveIcon: Icons.card_giftcard_outlined,
-                  label: 'Cửa Hàng',
+                  activeIcon: Icons.history_rounded,
+                  inactiveIcon: Icons.history_outlined,
+                  label: 'Lịch Sử',
                   context: context,
                 ),
                 _buildNavItem(

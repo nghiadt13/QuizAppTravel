@@ -1,12 +1,15 @@
+import 'dart:typed_data';
 import '../../../../core/errors/app_exception.dart';
+import '../../../../core/services/cloudinary_service.dart';
 import '../../domain/entities/quiz_set.dart';
 import '../../domain/repositories/i_quiz_manager_repository.dart';
 import 'i_quiz_manager_service.dart';
 
 class QuizManagerServiceImpl implements IQuizManagerService {
   final IQuizManagerRepository _repository;
+  final CloudinaryService _cloudinary;
 
-  QuizManagerServiceImpl(this._repository);
+  QuizManagerServiceImpl(this._repository, this._cloudinary);
 
   @override
   Future<List<QuizSet>> getMyQuizzes(String userId) async {
@@ -84,5 +87,22 @@ class QuizManagerServiceImpl implements IQuizManagerService {
       throw const AppException('Quiz ID không được để trống.');
     }
     await _repository.deleteQuiz(trimmedId);
+  }
+
+  @override
+  Future<String> uploadQuizCover(Uint8List imageBytes, String userId) async {
+    if (userId.isEmpty) {
+      throw const AppException('User ID không được để trống.');
+    }
+
+    try {
+      return await _cloudinary.uploadImage(
+        imageBytes: imageBytes,
+        folder: 'quiz_covers',
+        publicId: 'quiz_${userId}_${DateTime.now().millisecondsSinceEpoch}',
+      );
+    } catch (e) {
+      throw AppException('Không thể tải ảnh lên: $e');
+    }
   }
 }
