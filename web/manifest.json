@@ -1,11 +1,11 @@
 {
-    "name": "quiz_app_travel",
-    "short_name": "quiz_app_travel",
+    "name": "Quiz App Travel - Đấu Trường Quiz",
+    "short_name": "Quiz Travel",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0F172A",
+    "theme_color": "#0F172A",
+    "description": "Quiz App Travel - Đấu Trường Quiz & Du Lịch Tương Tác Thời Gian Thực.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
