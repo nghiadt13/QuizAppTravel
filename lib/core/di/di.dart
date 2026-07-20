@@ -90,7 +90,7 @@ Future<void> setupDependencies() async {
   if (!kIsWeb) {
     final googleSignIn = GoogleSignIn.instance;
     await googleSignIn.initialize(
-      clientId: '58793994198-0fr6me63al9ohipl3idp41dtqa632p3q.apps.googleusercontent.com',
+      serverClientId: '58793994198-otinq5qttaho3vvl04q3pemje8qrmj5f.apps.googleusercontent.com',
     );
     getIt.registerLazySingleton<GoogleSignIn>(() => googleSignIn);
   } else {
