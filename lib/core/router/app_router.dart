@@ -16,6 +16,7 @@ import '../../features/quest_room/presentation/views/lobby_screen.dart';
 import '../../features/quiz_game/presentation/views/quiz_play_screen.dart';
 import '../../features/quiz/presentation/views/create_quiz_screen.dart';
 import '../../features/quiz/presentation/views/quiz_detail_screen.dart';
+import '../../features/quiz/presentation/views/all_topics_screen.dart';
 import '../../features/quiz/domain/entities/quiz_set.dart';
 
 class AppRouter {
@@ -112,6 +113,10 @@ class AppRouter {
           final quiz = state.extra as QuizSet;
           return QuizDetailScreen(quiz: quiz);
         },
+      ),
+      GoRoute(
+        path: '/all-topics',
+        builder: (context, state) => const AllTopicsScreen(),
       ),
     ],
   );

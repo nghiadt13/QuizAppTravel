@@ -747,28 +747,62 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
                                 letterSpacing: 0.5,
                               ),
                             ),
-                            InkWell(
-                              onTap: () => _selectRandomTopic(colors),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    'Chọn ngẫu nhiên 🎲',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: colors.primary.withValues(
-                                        alpha: 0.8,
+                            Row(
+                              children: [
+                                InkWell(
+                                  onTap: () => _selectRandomTopic(colors),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 4,
+                                    ),
+                                    child: Text(
+                                      '🎲 Ngẫu nhiên',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: colors.primary.withValues(alpha: 0.8),
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                                const SizedBox(width: 8),
+                                InkWell(
+                                  onTap: () => context.push('/all-topics'),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 4,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'Xem tất cả',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: colors.primary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          size: 11,
+                                          color: colors.primary,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                         const SizedBox(height: 16),
 
-                        // Practice Topics Grid (Real Public Quizzes from Firestore or Fallback)
+                        // Practice Topics Grid (Limited to max 4 items for clean layout)
                         if (quizVm.isLoading && quizVm.publicQuizzes.isEmpty)
                           const Center(
                             child: Padding(
@@ -777,33 +811,84 @@ class _QuestsTabScreenState extends State<QuestsTabScreen>
                             ),
                           )
                         else if (quizVm.publicQuizzes.isNotEmpty)
-                          GridView.builder(
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 16,
-                                  mainAxisSpacing: 16,
-                                  childAspectRatio: 0.95,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              GridView.builder(
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      crossAxisSpacing: 16,
+                                      mainAxisSpacing: 16,
+                                      childAspectRatio: 0.95,
+                                    ),
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: min(4, quizVm.publicQuizzes.length),
+                                itemBuilder: (context, index) {
+                                  final quiz = quizVm.publicQuizzes[index];
+                                  return _buildPublicQuizCard(quiz, index, colors);
+                                },
+                              ),
+                              if (quizVm.publicQuizzes.length > 4) ...[
+                                const SizedBox(height: 16),
+                                OutlinedButton.icon(
+                                  onPressed: () => context.push('/all-topics'),
+                                  icon: const Icon(Icons.grid_view_rounded, size: 18),
+                                  label: Text(
+                                    'Xem thêm ${quizVm.publicQuizzes.length - 4} chủ đề khác ➔',
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: colors.primary,
+                                    side: BorderSide(
+                                      color: colors.primary.withValues(alpha: 0.2),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
                                 ),
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: quizVm.publicQuizzes.length,
-                            itemBuilder: (context, index) {
-                              final quiz = quizVm.publicQuizzes[index];
-                              return _buildPublicQuizCard(quiz, index, colors);
-                            },
+                              ],
+                            ],
                           )
                         else
-                          GridView.count(
-                            crossAxisCount: 2,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                            childAspectRatio: 0.95,
-                            children: _topics
-                                .map((topic) => _buildTopicCard(topic, colors))
-                                .toList(),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              GridView.count(
+                                crossAxisCount: 2,
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 16,
+                                childAspectRatio: 0.95,
+                                children: _topics
+                                    .take(4)
+                                    .map((topic) => _buildTopicCard(topic, colors))
+                                    .toList(),
+                              ),
+                              const SizedBox(height: 16),
+                              OutlinedButton.icon(
+                                onPressed: () => context.push('/all-topics'),
+                                icon: const Icon(Icons.grid_view_rounded, size: 18),
+                                label: const Text(
+                                  'Xem tất cả các chủ đề ➔',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: colors.primary,
+                                  side: BorderSide(
+                                    color: colors.primary.withValues(alpha: 0.2),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         const SizedBox(height: 32),
 
