@@ -808,111 +808,307 @@ class _RoomLeaderboardBottomSheet extends StatelessWidget {
                 final sorted = List<Participant>.from(participants)
                   ..sort((a, b) => b.score.compareTo(a.score));
 
-                return ListView.builder(
+                final topThree = sorted.take(3).toList();
+                final rest = sorted.length > 3 ? sorted.sublist(3) : <Participant>[];
+
+                return SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  itemCount: sorted.length,
-                  itemBuilder: (context, index) {
-                    final p = sorted[index];
-                    final rank = index + 1;
+                  child: Column(
+                    children: [
+                      // Top 3 Podium
+                      _ParticipantPodium(topThree: topThree),
 
-                    Color rankColor;
-                    Widget rankWidget;
-                    if (rank == 1) {
-                      rankWidget = const Text('🥇', style: TextStyle(fontSize: 24));
-                      rankColor = const Color(0xFFFFD700);
-                    } else if (rank == 2) {
-                      rankWidget = const Text('🥈', style: TextStyle(fontSize: 24));
-                      rankColor = const Color(0xFFC0C0C0);
-                    } else if (rank == 3) {
-                      rankWidget = const Text('🥉', style: TextStyle(fontSize: 24));
-                      rankColor = const Color(0xFFCD7F32);
-                    } else {
-                      rankWidget = Text(
-                        '#$rank',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.outline,
-                        ),
-                      );
-                      rankColor = Colors.transparent;
-                    }
+                      const SizedBox(height: 16),
 
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: rank <= 3
-                              ? rankColor.withValues(alpha: 0.5)
-                              : Colors.grey.shade200,
-                          width: rank <= 3 ? 1.5 : 1,
+                      if (rest.isNotEmpty) ...[
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 10, left: 4),
+                            child: Text(
+                              'Bảng xếp hạng tiếp theo',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 36,
-                            child: Center(child: rankWidget),
-                          ),
-                          const SizedBox(width: 12),
-                          AppAvatar(
-                            avatarUrl: p.avatarId,
-                            displayName: p.displayName,
-                            radius: 20,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        ...List.generate(rest.length, (index) {
+                          final p = rest[index];
+                          final rank = index + 4; // Top 4 onwards
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.grey.shade200),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.03),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
                               children: [
-                                Text(
-                                  p.displayName,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
+                                SizedBox(
+                                  width: 36,
+                                  child: Center(
+                                    child: Text(
+                                      '#$rank',
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.outline,
+                                      ),
+                                    ),
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(width: 12),
+                                AppAvatar(
+                                  avatarUrl: p.avatarId,
+                                  displayName: p.displayName,
+                                  radius: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        p.displayName,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.primary,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        p.status == ParticipantStatus.finished
+                                            ? 'Đã hoàn thành'
+                                            : 'Đang thi đấu',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: p.status == ParticipantStatus.finished
+                                              ? const Color(0xFF22C55E)
+                                              : AppColors.outline,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                                 Text(
-                                  p.status == ParticipantStatus.finished
-                                      ? 'Đã hoàn thành'
-                                      : 'Đang thi đấu',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: p.status == ParticipantStatus.finished
-                                        ? const Color(0xFF22C55E)
-                                        : AppColors.outline,
+                                  '${p.score} điểm',
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppColors.secondary,
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                          Text(
-                            '${p.score} điểm',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.secondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                          );
+                        }),
+                      ],
+                    ],
+                  ),
                 );
               },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ParticipantPodium extends StatelessWidget {
+  final List<Participant> topThree;
+
+  const _ParticipantPodium({required this.topThree});
+
+  @override
+  Widget build(BuildContext context) {
+    final first = topThree.isNotEmpty ? topThree[0] : null;
+    final second = topThree.length > 1 ? topThree[1] : null;
+    final third = topThree.length > 2 ? topThree[2] : null;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // 2nd Place Column (Left)
+          if (second != null)
+            _buildPodiumColumn(
+              context,
+              participant: second,
+              place: 2,
+              height: 90.0,
+              color: const Color(0xFFC0C0C0), // Silver
+              badge: '🥈',
+            )
+          else
+            const Expanded(child: SizedBox()),
+
+          const SizedBox(width: 8),
+
+          // 1st Place Column (Center - Highest)
+          if (first != null)
+            _buildPodiumColumn(
+              context,
+              participant: first,
+              place: 1,
+              height: 120.0,
+              color: const Color(0xFFFFD700), // Gold
+              badge: '🥇',
+              hasCrown: true,
+            )
+          else
+            const Expanded(child: SizedBox()),
+
+          const SizedBox(width: 8),
+
+          // 3rd Place Column (Right)
+          if (third != null)
+            _buildPodiumColumn(
+              context,
+              participant: third,
+              place: 3,
+              height: 75.0,
+              color: const Color(0xFFCD7F32), // Bronze
+              badge: '🥉',
+            )
+          else
+            const Expanded(child: SizedBox()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPodiumColumn(
+    BuildContext context, {
+    required Participant participant,
+    required int place,
+    required double height,
+    required Color color,
+    required String badge,
+    bool hasCrown = false,
+  }) {
+    return Expanded(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Avatar stack with crown/badge
+          Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: color,
+                    width: 3,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: AppAvatar(
+                  avatarUrl: participant.avatarId,
+                  displayName: participant.displayName,
+                  radius: hasCrown ? 28 : 22,
+                ),
+              ),
+              if (hasCrown)
+                const Positioned(
+                  top: -20,
+                  child: Text('👑', style: TextStyle(fontSize: 22)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Username
+          Text(
+            participant.displayName,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 2),
+          // Score
+          Text(
+            '${participant.score} điểm',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: AppColors.secondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Podium Pedestal Block
+          Container(
+            height: height,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  color,
+                  color.withValues(alpha: 0.85),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  badge,
+                  style: const TextStyle(fontSize: 24),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'TOP $place',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 13,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
