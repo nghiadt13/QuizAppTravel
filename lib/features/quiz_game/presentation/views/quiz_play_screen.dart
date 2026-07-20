@@ -347,7 +347,7 @@ class _QuizPlayScreenState extends State<QuizPlayScreen> {
                     ),
                   ),
                   label: Text(
-                    'HOÀN THÀNH & VỀ TRANG CHỦ',
+                    'VỀ TRANG CHỦ',
                     style: AppTextStyles.bodyLarge.copyWith(
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.5,
