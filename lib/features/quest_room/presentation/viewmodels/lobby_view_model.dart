@@ -33,6 +33,13 @@ class LobbyViewModel extends ChangeNotifier {
     _roomSubscription?.cancel();
     _participantsSubscription?.cancel();
 
+    Timer(const Duration(seconds: 5), () {
+      if (_isLoading) {
+        _isLoading = false;
+        notifyListeners();
+      }
+    });
+
     _roomSubscription = _service.watchRoom(roomId).listen(
       (room) {
         _room = room;
