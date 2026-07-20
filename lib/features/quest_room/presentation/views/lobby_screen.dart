@@ -73,11 +73,14 @@ class _LobbyScreenState extends State<LobbyScreen>
       final user = authVm.currentUser;
       final isHost = (user != null && user.uid == room.hostId);
 
-      if (isHost) {
-        context.replace('/live-monitoring/${widget.roomId}');
-      } else {
-        context.replace('/quiz/${widget.roomId}');
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (isHost) {
+          context.replace('/live-monitoring/${widget.roomId}');
+        } else {
+          context.replace('/quiz/${widget.roomId}');
+        }
+      });
       return;
     }
 
@@ -85,23 +88,26 @@ class _LobbyScreenState extends State<LobbyScreen>
       final authVm = context.read<AuthViewModel>();
       final isHost = authVm.currentUser?.uid == room?.hostId;
       if (!isHost) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Phòng chơi đã đóng'),
-            content: const Text('Chủ phòng đã kết thúc hoặc hủy phòng chơi này.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                  if (mounted) context.go('/home/quests');
-                },
-                child: const Text('Đồng ý'),
-              ),
-            ],
-          ),
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Phòng chơi đã đóng'),
+              content: const Text('Chủ phòng đã kết thúc hoặc hủy phòng chơi này.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    if (mounted) context.go('/home/quests');
+                  },
+                  child: const Text('Đồng ý'),
+                ),
+              ],
+            ),
+          );
+        });
       }
     }
   }

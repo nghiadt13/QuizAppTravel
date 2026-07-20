@@ -19,29 +19,29 @@ class LeaderboardTabScreen extends StatefulWidget {
 }
 
 class _LeaderboardTabScreenState extends State<LeaderboardTabScreen> {
-  late Future<List<QuestRoom>> _roomsFuture;
+  Future<List<QuestRoom>>? _roomsFuture;
   bool _isLoadingTap = false;
 
   @override
-  void initState() {
-    super.initState();
-    _loadRooms();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_roomsFuture == null) {
+      _loadRooms();
+    }
   }
 
   void _loadRooms() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final authVm = context.read<AuthViewModel>();
-      final playerSetupVm = context.read<PlayerSetupViewModel>();
-      final userId = authVm.currentUser?.uid ?? playerSetupVm.playerId ?? '';
-      final isAdmin = authVm.currentUser?.email == 'll.stylish73@gmail.com';
+    if (!mounted) return;
+    final authVm = context.read<AuthViewModel>();
+    final playerSetupVm = context.read<PlayerSetupViewModel>();
+    final userId = authVm.currentUser?.uid ?? playerSetupVm.playerId ?? '';
+    final isAdmin = authVm.currentUser?.email == 'll.stylish73@gmail.com';
 
-      setState(() {
-        _roomsFuture = getIt<IQuestRoomService>().getLeaderboardRoomsForUser(
-          userId,
-          isAdmin: isAdmin,
-        );
-      });
+    setState(() {
+      _roomsFuture = getIt<IQuestRoomService>().getLeaderboardRoomsForUser(
+        userId,
+        isAdmin: isAdmin,
+      );
     });
   }
 
